@@ -13,8 +13,3 @@
  - go testを導入（これでgo vetもできる）
  - go lintは非推奨
    - staticcheckを導入（VSCodeではデフォルト）
-
-SA	staticcheck	コードの正しさに関するチェック
-S	simple	コードの簡潔さに関するチェック
-ST	stylecheck	コーディングスタイルに関するチェック
-QF	quickfix	gopls の自動リファクタリングとして表示されるチェッ

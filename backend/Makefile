@@ -26,4 +26,17 @@ format:
 lint: sec errcheck staticcheck
 	@echo "Check lint finished"
 
-.PHONY: test sec errcheck staticcheck format lint
+build:
+	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/main.go
+
+# --------------------------
+# Utils
+# --------------------------
+
+# DynamoDBの管理画面を起動
+dynamo.admin:
+	export DYNAMO_ENDPOINT="http://localhost:54566" && \
+	export PORT="4005" && \
+	npx dynamodb-admin
+
+.PHONY: test sec errcheck staticcheck format lint build dynamo.admin
