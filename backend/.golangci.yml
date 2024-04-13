@@ -1,0 +1,15 @@
+run:
+  deadline: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - goimports
+    - golint
+    - govet
+    - gosec
+    - misspell
+    - errcheck
+    - staticcheck
+    - prealloc
+    - ineffassign

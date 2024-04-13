@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  aws:
+    image: localstack/localstack:2.1.0-arm64
+    ports:
+      - 54566:4566
+    environment:
+      SERVICES: dynamodb,s3
+      DEFAULT_REGION: ap-northeast-1
+    volumes:
+    # ready hook
+      - "$PWD/backend/docker/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - 'localstack-data:/tmp/localstack'
+
+  backend:
+    build:
+      context: $PWD/backend
+      dockerfile: $PWD/backend/docker/Dockerfile
+    entrypoint: "air -c .air.toml"
+    environment:
+      AWS_ACCESS_KEY_ID: "XXXX"
+      AWS_SECRET_ACCESS_KEY: "XXXX"
+    volumes:
+      - $PWD/backend:/app
+    env_file:
+      - $PWD/backend/.env.local
+    ports:
+      - "6500:6500"
+    depends_on:
+      aws:
+        condition: service_started
+
+volumes:
+  localstack-data: {}
