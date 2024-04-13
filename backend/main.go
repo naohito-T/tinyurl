@@ -20,12 +20,11 @@ func main() {
 	e.Logger.Fatal(e.Start(":6500"))
 }
 
-	func hello(c echo.Context) error {
+func hello(c echo.Context) error {
 	println("Hello, World!")
-	// if err := isValid("hello"); err != nil {
-	// 	return err
-	// }
-	isValid("hello")
+	if err := isValid("hello"); err != nil {
+		return err
+	}
 	return c.String(http.StatusOK, "Hello, World!")
 }
 
