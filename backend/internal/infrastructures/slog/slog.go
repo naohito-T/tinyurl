@@ -17,7 +17,7 @@ type Logger struct {
 	logger ILogger
 }
 
-func NewLogger() *Logger {
+func newLogger() *Logger {
 	// これは1.22.0で追加されたもの
 	// slog.SetLogLoggerLevel(slog.LevelDebug)
 	return &Logger{
@@ -41,6 +41,7 @@ func (l *Logger) Error(format string, v ...any) {
 	l.logger.Error(format, v...)
 }
 
+// golangではFatalは使わない（os.Exit(1)を勝手に使われるため）
 // func (l *Logger) Fatal(format string, v ...any) {
 // 	l.logger.Fatal(format, v...)
 // 	os.Exit(1)

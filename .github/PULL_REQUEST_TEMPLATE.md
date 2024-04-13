@@ -1,4 +1,4 @@
-# Pull Request Template
+# Pull Request
 
 ## Description
 <!-- Provide a brief description of the changes made in this pull request. If this is related to an existing issue, please link it here. -->
