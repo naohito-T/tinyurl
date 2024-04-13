@@ -27,7 +27,7 @@ lint: sec errcheck staticcheck
 	@echo "Check lint finished"
 
 build:
-	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/main.go
+	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/api/main.go
 
 # --------------------------
 # Utils
