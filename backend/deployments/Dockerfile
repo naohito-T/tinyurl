@@ -10,6 +10,6 @@ COPY go.mod go.sum /app/
 RUN go mod download
 COPY . /app/
 # アプリケーションをビルド
-RUN go build -o ./main
+RUN go build -o bin/main cmd/api/main.go
 # 実行コマンドを設定
 CMD ["air", "-c", ".air.toml"]

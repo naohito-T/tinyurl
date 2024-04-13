@@ -8,6 +8,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
+const (
+	defaultPort = "6500"
+)
+
 func main() {
 	// Echo instance
 	e := echo.New()
@@ -17,7 +21,7 @@ func main() {
 	// Routes
 	e.GET("/", hello)
 	// e.Startでエラーが発生した場合、Fatalでプログラムを終了する
-	e.Logger.Fatal(e.Start(":6500"))
+	e.Logger.Fatal(e.Start(defaultPort))
 }
 
 func hello(c echo.Context) error {
