@@ -2,7 +2,7 @@
 
 <details>
   <summary style="font-size: 20px">🔱 CI Actions Status</summary>
-  [![[main] Test Backend](https://github.com/naohito-T/tinyurl/actions/workflows/test_backend.yml/badge.svg?branch=main)](https://github.com/naohito-T/tinyurl/actions/workflows/test_backend.yml)
+  [![Test Backend](https://github.com/naohito-T/tinyurl/actions/workflows/test_backend.yml/badge.svg?branch=main)](https://github.com/naohito-T/tinyurl/actions/workflows/test_backend.yml)
 </details>
 
 ## Overview
