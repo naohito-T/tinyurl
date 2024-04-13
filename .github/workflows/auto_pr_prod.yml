@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "release"
+      - "develop"
 
 jobs:
   create-pr-prod:
@@ -18,7 +18,7 @@ jobs:
         run: |
           if ! gh pr list -B main | grep OPEN; then
             gh pr create \
-              --head release \
+              --head develop \
               --base main \
               --title "Deploy to production 🎉" \
               --body "Deploy to production!" \
