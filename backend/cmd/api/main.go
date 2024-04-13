@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware/accesslog"
 )
 
 const (
@@ -16,7 +17,7 @@ func main() {
 	// Echo instance
 	e := echo.New()
 	// Middleware
-	e.Use(middleware.Logger())
+	e.Use(accesslog.AccessLog())
 	e.Use(middleware.Recover())
 	// Routes
 	e.GET("/", hello)
