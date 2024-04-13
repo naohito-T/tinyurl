@@ -1,0 +1,29 @@
+name: Auto Pull Request prod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "release"
+
+jobs:
+  create-pr-prod:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: create PR if not exists
+        run: |
+          if ! gh pr list -B main | grep OPEN; then
+            gh pr create \
+              --head release \
+              --base main \
+              --title "Deploy to production 🎉" \
+              --body "Deploy to production!" \
+              --reviewer $DEPLOY_REVIEWERS
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_REVIEWERS: - "@naohito-T"
