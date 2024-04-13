@@ -23,14 +23,15 @@ format:
 	go fmt ./...
 	goimports -w ./
 
+# さまざまなlintを包括したサードパーティツール
+lint-all:
+	golangci-lint run ./...
+
 lint: sec errcheck staticcheck
 	@echo "Check lint finished"
 
 build:
 	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/api/main.go
-
-test:
-	go test -v ./...
 
 # --------------------------
 # Utils
@@ -42,4 +43,4 @@ dynamo.admin:
 	export PORT="4005" && \
 	npx dynamodb-admin
 
-.PHONY: test sec errcheck staticcheck format lint build test dynamo.admin
+.PHONY: test sec errcheck staticcheck format lint-all lint build test dynamo.admin
