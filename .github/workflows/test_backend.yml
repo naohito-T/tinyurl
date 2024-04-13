@@ -39,7 +39,7 @@ jobs:
           go-version-file: "backend/go.mod"
           cache-dependency-path: "backend/go.sum"
 
-      - name: golangci-lint
+      - name: Check golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
           version: v1.54
@@ -58,5 +58,21 @@ jobs:
           go-version-file: "backend/go.mod"
           cache-dependency-path: "backend/go.sum"
 
-      - name: Build check
-        run: GOARCH=arm64 GOOS=linux go build -ldflags="-s -w"
+      - name: Check Build API entrypoint 
+        run: GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" cmd/api/main.go
+
+  test-backend:
+    needs: setup-go-modules-backend
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        id: setup-go
+        with:
+          go-version-file: "backend/go.mod"
+          cache-dependency-path: "backend/go.sum"
+
+      - name: Check test
+        run: make test

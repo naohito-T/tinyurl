@@ -1,0 +1,11 @@
+# see https://github.com/kentaro-m/auto-assign-action
+addReviewers: false
+
+addAssignees: author
+
+numberOfReviewers: 0
+
+skipKeywords:
+  - wip
+  - WIP
+  - bump

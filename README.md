@@ -1,8 +1,16 @@
 # tinyurl
 
-## overview
+<details>
+  <summary style="font-size: 20px">🔱 CI Actions Status</summary>
+  [![[main] Test Backend](https://github.com/naohito-T/tinyurl/actions/workflows/test_backend.yml/badge.svg?branch=main)](https://github.com/naohito-T/tinyurl/actions/workflows/test_backend.yml)
+</details>
+
+## Overview
 
 短縮URLを作成するサービス
+
+## Usage
+<!-- 簡単な使い方です。 -->
 
 ## Feature
 
@@ -14,3 +22,11 @@
 
 このプロジェクトに貢献したい方は以下のドキュメントを参考にしてください。
 [CONTRIBUTING](./CONTRIBUTING.md)
+
+## Author
+
+@naohito-T
+
+## License
+
+[MIT](./LICENSE)
