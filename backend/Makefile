@@ -29,6 +29,9 @@ lint: sec errcheck staticcheck
 build:
 	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/api/main.go
 
+test:
+	go test -v ./...
+
 # --------------------------
 # Utils
 # --------------------------
@@ -39,4 +42,4 @@ dynamo.admin:
 	export PORT="4005" && \
 	npx dynamodb-admin
 
-.PHONY: test sec errcheck staticcheck format lint build dynamo.admin
+.PHONY: test sec errcheck staticcheck format lint build test dynamo.admin
