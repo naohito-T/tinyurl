@@ -1,6 +1,13 @@
 {
   "editor.formatOnSave": true,
   "go.formatTool": "goimports",
+  "go.lintTool": "golangci-lint",
+  // workspaceFolderはVisual Studio Code (VS Code)の変数で、現在開いているワークスペースのルートフォルダを指します。
+  // つまり、この変数はVS Codeで開かれているプロジェクトの最上位ディレクトリのパスに解決されます。
+  "go.lintFlags": [
+    "--config=${workspaceFolder}/backend/.golangci.yml",
+    "--fast"
+  ],
   "[go]": {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
