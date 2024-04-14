@@ -43,7 +43,7 @@ type ItemKey struct {
 	ID string `dynamodbav:"id"`
 }
 
-func (r *ShortURLRepository) GetByShortURL(ctx context.Context, id string) (domain.ShortURL, error) {
+func (r *ShortURLRepository) GetByShortURL(id string) (domain.ShortURL, error) {
 	r.logger.Debug("GetItemInput: %v", id)
 
 	itemKey := ItemKey{
@@ -56,7 +56,7 @@ func (r *ShortURLRepository) GetByShortURL(ctx context.Context, id string) (doma
 		return domain.ShortURL{}, err
 	}
 
-	result, err := r.Client.Conn.GetItem(ctx, &dynamodb.GetItemInput{
+	result, err := r.Client.Conn.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: aws.String("offline-tinyurls"),
 		Key:       av,
 	})
@@ -82,7 +82,7 @@ func (r *ShortURLRepository) GetByShortURL(ctx context.Context, id string) (doma
 	return shortURL, nil
 }
 
-func (r *ShortURLRepository) CreateShortURL(ctx context.Context, params *domain.ShortURL) error {
+func (r *ShortURLRepository) CreateShortURL(params *domain.ShortURL) error {
 	r.logger.Debug("PutItemInput: %v", params)
 
 	item := TableItem{
@@ -95,7 +95,7 @@ func (r *ShortURLRepository) CreateShortURL(ctx context.Context, params *domain.
 		log.Fatal(err)
 	}
 
-	_, err = r.Client.Conn.PutItem(ctx, &dynamodb.PutItemInput{
+	_, err = r.Client.Conn.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		TableName: aws.String("offline-tinyurls"),
 		Item:      av,
 	})

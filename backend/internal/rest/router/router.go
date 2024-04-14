@@ -6,12 +6,15 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
+	// "github.com/naohito-T/tinyurl/backend/internal/rest/container"
 )
 
 // https://tinyurl.com/app/api/url/create"
 // NewRouter これもシングルトンにした場合の例が気になる
 func NewRouter(e *echo.Echo) {
-	e.GET("/health", health)
+	// container := container.NewGuestContainer()
+
+	e.GET("/health", hello)
 	e.GET("/api/v1/urls/:shortUrl", hello)
 	e.POST("/api/v1/urls", hello)
 }

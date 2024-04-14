@@ -1,14 +1,12 @@
 package usecase
 
 import (
-	"context"
-
 	"github.com/naohito-T/tinyurl/backend/domain"
 )
 
 type IShortURLRepo interface {
-	GetByShortURL(ctx context.Context, id string) (domain.ShortURL, error)
-	CreateShortURL(ctx context.Context, params *domain.ShortURL) error
+	GetByShortURL(id string) (domain.ShortURL, error)
+	CreateShortURL(params *domain.ShortURL) error
 }
 
 type ShortURLUsecase struct {
@@ -21,10 +19,14 @@ func NewURLUsecase(u IShortURLRepo) *ShortURLUsecase {
 	}
 }
 
-func (u *ShortURLUsecase) GetByShortURL(ctx context.Context, id string) (domain.ShortURL, error) {
-	return u.shortURLRepo.GetByShortURL(ctx, id)
+func (u *ShortURLUsecase) GetByShortURL(id string) domain.ShortURL {
+	shortURL, err := u.shortURLRepo.GetByShortURL(id)
+	if err != nil {
+		panic(err)
+	}
+	return shortURL
 }
 
-func (u *ShortURLUsecase) CreateShortURL(ctx context.Context, params *domain.ShortURL) error {
-	return u.shortURLRepo.CreateShortURL(ctx, params)
+func (u *ShortURLUsecase) CreateShortURL(params *domain.ShortURL) error {
+	return u.shortURLRepo.CreateShortURL(params)
 }

@@ -14,9 +14,7 @@ type GuestContainer struct {
 }
 
 var newGuestContainer = sync.OnceValue(func() *GuestContainer {
-	// repositoryにinfrastructuresを追加する
 	dynamoRepo := repoDynamo.NewShortURLRepository(dynamo.NewDynamoConnection(), slog.NewLogger())
-	// usecaseにrepositoryを追加する
 	return &GuestContainer{
 		URLUsecase: usecase.NewURLUsecase(dynamoRepo),
 	}
