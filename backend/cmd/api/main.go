@@ -5,8 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware/accesslog"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware"
 )
 
 const (
@@ -16,9 +15,8 @@ const (
 func main() {
 	// Echo instance
 	e := echo.New()
-	// Middleware
-	e.Use(accesslog.AccessLog())
-	e.Use(middleware.Recover())
+	middleware.CustomMiddleware(e)
+
 	// Routes
 	e.GET("/", hello)
 	// e.Startでエラーが発生した場合、Fatalでプログラムを終了する
