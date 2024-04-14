@@ -16,7 +16,6 @@ func main() {
 	// Echo instance
 	e := echo.New()
 	middleware.CustomMiddleware(e)
-
 	// Routes
 	e.GET("/", hello)
 	// e.Startでエラーが発生した場合、Fatalでプログラムを終了する
