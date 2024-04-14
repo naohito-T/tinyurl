@@ -22,7 +22,7 @@ jobs:
               --base main \
               --title "Deploy to production 🎉" \
               --body "Deploy to production!" \
-              --reviewer @naohito-T
+              --reviewer naohito-T
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
