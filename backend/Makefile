@@ -8,7 +8,7 @@ test:
 # see https://logmi.jp/tech/articles/324549
 # セキュリティチェック
 sec:
-	gosec ./...
+	golangci-lint run --enable=gosec ./...
 
 # エラーチェック
 errcheck:
@@ -16,7 +16,7 @@ errcheck:
 
 # 静的解析
 staticcheck:
-	staticcheck ./...
+	golangci-lint run --enable=staticcheck ./...
 
 # フォーマットとインポートの整理
 format:

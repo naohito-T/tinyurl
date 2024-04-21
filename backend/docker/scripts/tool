@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# 将来的には開発ツールもdocker内で実行するようにする。
+docker run -t --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.57.2 golangci-lint run -v

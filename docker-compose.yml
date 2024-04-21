@@ -9,13 +9,13 @@ services:
       DEFAULT_REGION: ap-northeast-1
     volumes:
     # ready hook
-      - "$PWD/backend/build/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "$PWD/backend/docker/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
       - 'localstack-data:/tmp/localstack'
 
   backend:
     build:
       context: $PWD/backend
-      dockerfile: $PWD/backend/deployments/Dockerfile
+      dockerfile: $PWD/backend/docker/Dockerfile
     entrypoint: "air -c .air.toml"
     environment:
       AWS_ACCESS_KEY_ID: "XXXX"

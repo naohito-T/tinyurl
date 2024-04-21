@@ -1,6 +1,12 @@
+# see: https://golangci-lint.run/
+# reference: https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
 run:
   deadline: 5m
 
+issues:
+  # golangci-lintがdefaultで無効にしているlintersを有効にする
+  exclude-use-default: false
+# linters-settings:
 linters:
   disable-all: true
   enable:
