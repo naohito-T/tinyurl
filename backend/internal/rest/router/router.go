@@ -5,18 +5,26 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	Router "github.com/naohito-T/tinyurl/backend/configs"
 	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/handler"
 	// "github.com/naohito-T/tinyurl/backend/internal/rest/container"
 )
+
+func catchAllHandler(c echo.Context) error {
+	return c.JSON(http.StatusNotFound, map[string]string{"message": "Route not found"})
+}
 
 // https://tinyurl.com/app/api/url/create"
 // NewRouter これもシングルトンにした場合の例が気になる
 func NewRouter(e *echo.Echo) {
 	// container := container.NewGuestContainer()
+	e.GET(Router.Health, handler.HealthHandler)
+	e.GET(Router.GetShortURL, hello)
+	e.POST(Router.CreateShortURL, hello)
 
-	e.GET("/health", hello)
-	e.GET("/api/v1/urls/:shortUrl", hello)
-	e.POST("/api/v1/urls", hello)
+	// 未定義のルート用のキャッチオールハンドラ
+	e.Any("/*", catchAllHandler)
 }
 
 func hello(c echo.Context) error {
