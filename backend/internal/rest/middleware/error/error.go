@@ -4,7 +4,6 @@ package error
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/naohito-T/tinyurl/backend/domain/customerror"
@@ -15,22 +14,21 @@ import (
 // この型アサーションを使うことで、安全に型変換を行いつつ、エラーチェックを同時に実施できます。
 func CustomErrorHandler(err error, c echo.Context) {
 	c.Logger().Error("カスタムエラーに入ったよ")
-	if errors.Is(err, customerror.WrongEmailVerificationErrorInstance) {
-		c.Logger().Error("これがWrongEmailVerificationErrorアプリケーションエラー")
-	}
-	he, ok := err.(*echo.HTTPError)
-	if !ok {
-		he = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
 	// ロギング
-	c.Logger().Error(err)
-
-	// エラーレスポンスを送信する例
-	if err := c.JSON(he.Code, map[string]string{"message": he.Message.(string)}); err != nil {
-		c.Logger().Error(err)
-	}
+	// c.Logger().Error(err)
+	appErr := buildError(err, c)
+	c.JSON(appErr.Status, map[string]string{"code": appErr.Code, "message": appErr.Message})
 }
 
-// func buildError(err error, code int) *echo.HTTPError {
-
-// }
+func buildError(err error, c echo.Context) *customerror.ApplicationError {
+	appErr := customerror.ApplicationError{
+		Status:  customerror.UnexpectedCode.Status,
+		Code:    customerror.UnexpectedCode.Code,
+		Message: customerror.UnexpectedCode.Message,
+	}
+	if errors.Is(err, customerror.WrongEmailVerificationErrorInstance) {
+		c.Logger().Error("これがWrongEmailVerificationErrorアプリケーションエラー")
+		// return &customerror.ApplicationError{}
+	}
+	return &appErr
+}

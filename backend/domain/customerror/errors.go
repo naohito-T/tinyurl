@@ -8,13 +8,17 @@ import (
 
 // ApplicationError はアプリケーション特有のエラー情報を保持する基本構造体です。
 type ApplicationError struct {
-	Code    int
-	Message string
+	// StatusCode（JSON parseでは構造体省略）
+	Status int `json:"-"`
+	// Code はエラーコードを表します。
+	Code string `json:"code"`
+	// Message はエラーメッセージを表します。
+	Message string `json:"message"`
 }
 
 // Error メソッドは error インターフェースを実装します。
 func (e *ApplicationError) Error() string {
-	return fmt.Sprintf("Code: %d, Message: %s", e.Code, e.Message)
+	return fmt.Sprintf("Code: %s, Message: %s", e.Code, e.Message)
 }
 
 // WrongEmailVerificationError は特定の条件下で利用されるカスタムエラーです。
@@ -30,7 +34,8 @@ func NewWrongEmailVerificationError(isTally, isRedirect bool, redirectQuery stri
 	q, _ := url.ParseQuery(redirectQuery)
 	return &WrongEmailVerificationError{
 		ApplicationError: ApplicationError{
-			Code:    http.StatusBadRequest,
+			Status:  http.StatusBadRequest,
+			Code:    "WRONG_EMAIL_VERIFICATION_ERROR",
 			Message: "Wrong email verification code",
 		},
 		IsTally:       isTally,
