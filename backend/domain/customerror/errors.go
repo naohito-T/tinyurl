@@ -45,9 +45,9 @@ func NewWrongEmailVerificationError(isTally, isRedirect bool, redirectQuery stri
 }
 
 // LogError はエラーのロギングを行うメソッドです。
-func (e *WrongEmailVerificationError) LogError(req *http.Request) {
-	fmt.Println("Error occurred:", e.Error(), "Query:", e.RedirectQuery.Encode())
-}
+// func (e *WrongEmailVerificationError) LogError(req *http.Request) {
+// 	fmt.Println("Error occurred:", e.Error(), "Query:", e.RedirectQuery.Encode())
+// }
 
 // Is メソッドを追加
 // func (e *WrongEmailVerificationError) Is(target error) bool {

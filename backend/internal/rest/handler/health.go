@@ -7,6 +7,7 @@ import (
 	"github.com/naohito-T/tinyurl/backend/domain/customerror"
 )
 
+// HealthCheckParams はヘルスチェックのパラメータを定義します
 type HealthCheckParams struct {
 	// CheckDB *string `query:"check_db" validate:"required"`
 	CheckDB *string `query:"check_db"`

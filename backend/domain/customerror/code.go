@@ -11,18 +11,18 @@ type ApplicationErrorCode struct {
 }
 
 var (
-	WrongEmailVerificationCode ApplicationErrorCode = ApplicationErrorCode{
+	WrongEmailVerificationCode = ApplicationErrorCode{
 		Code:    "WRONG_EMAIL_VERIFICATION_ERROR",
 		Message: "Wrong email verification code",
 	}
 
 	// Unknown Error: システムがエラーの原因を特定できないか、エラーの種類が分類されていない場合に使用する。
-	UnknownCode ApplicationErrorCode = ApplicationErrorCode{
+	UnknownCode = ApplicationErrorCode{
 		Code:    "unknown_error",
 		Message: "unknown_error",
 	}
 
-	UnexpectedCode ApplicationErrorCode = ApplicationErrorCode{
+	UnexpectedCode = ApplicationErrorCode{
 		Code:    "unexpected_error",
 		Message: "unexpected_error",
 	}

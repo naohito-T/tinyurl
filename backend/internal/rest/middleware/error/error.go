@@ -4,6 +4,7 @@ package error
 
 import (
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -16,7 +17,10 @@ func CustomErrorHandler(err error, c echo.Context) {
 	// ロギング
 	// c.Logger().Error(err)
 	appErr := buildError(err, c)
-	c.JSON(appErr.Status, map[string]string{"code": appErr.Code, "message": appErr.Message})
+	if err := c.JSON(appErr.Status, map[string]string{"code": appErr.Code, "message": appErr.Message}); err != nil {
+		// handle error, e.g., log it or return it
+		log.Println("JSON response error:", err)
+	}
 }
 
 func buildError(err error, c echo.Context) *customerror.ApplicationError {
@@ -34,10 +38,7 @@ func buildError(err error, c echo.Context) *customerror.ApplicationError {
 			Code:    "ValidationError",
 			Message: "Input validation failed",
 		}
-	} else {
-		c.Logger().Error("判定なし。")
 	}
-
 	if errors.Is(err, customerror.WrongEmailVerificationErrorInstance) {
 		c.Logger().Error("これがWrongEmailVerificationErrorアプリケーションエラー")
 	}
