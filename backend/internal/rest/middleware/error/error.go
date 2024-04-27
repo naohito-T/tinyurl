@@ -1,6 +1,11 @@
 package error
 
 // see: https://go.dev/play/p/TzZE1mdL63_1
+// errors.Is()とerrors.As()は、
+// errors.Is(err, target)
+// ラップされたエラーでも、targetとなるエラーと一致するかどうか、値として判定したい時。
+// errors.As(err, target)
+// ラップされたエラーでも、targetとなるエラーに代入可能かどうか、型として判定したい時。
 
 import (
 	"errors"

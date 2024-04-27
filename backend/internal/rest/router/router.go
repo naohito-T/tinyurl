@@ -13,7 +13,7 @@ import (
 
 // https://tinyurl.com/app/api/url/create"
 // NewRouter これもシングルトンにした場合の例が気になる
-func NewRouter(e *echo.Echo) {
+func NewRouter(e *echo.Echo) *echo.Echo {
 	// container := container.NewGuestContainer()
 	e.GET(Router.Health, handler.HealthHandler)
 	e.GET(Router.GetShortURL, hello)
@@ -22,6 +22,8 @@ func NewRouter(e *echo.Echo) {
 	e.Any("/*", func(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})
 	})
+
+	return e
 }
 
 func hello(c echo.Context) error {
