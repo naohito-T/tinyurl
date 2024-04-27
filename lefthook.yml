@@ -1,0 +1,22 @@
+# EXAMPLE USAGE
+# Refer for explanation to following link:
+# https://github.com/evilmartians/lefthook/blob/master/docs/full_guide.md
+
+pre-push:
+  parallel: true
+  commands:
+    mod-audit:
+      tags: backend security
+      root: "backend"
+      glob: "*.{go}"
+      run: go mod tidy
+
+pre-commit:
+  parallel: true
+  commands:
+    backend:
+      tags: backend
+      root: "backend"
+      glob: "*.{go}"
+      files: git diff --name-only HEAD | grep "backend" || echo ''
+      run: make lint
