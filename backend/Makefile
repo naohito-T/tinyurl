@@ -1,6 +1,11 @@
 # .env 関連
 STAGE ?= local
 
+dev:
+	@echo "Start develop"
+	air -c .air.toml
+	@echo "Start localstack finished"
+
 # go標準ライブラリのテスト（vetも実行する）
 test:
 	go test ./... -v
@@ -8,27 +13,27 @@ test:
 # see https://logmi.jp/tech/articles/324549
 # セキュリティチェック
 sec:
-	golangci-lint run --enable=gosec ./...
+	golangci-lint run --enable-only=gosec ./...
 
 # エラーチェック
 errcheck:
-	errcheck ./...
+	golangci-lint run --enable-only=errcheck ./...
 
 # 静的解析
 staticcheck:
-	golangci-lint run --enable=staticcheck ./...
+	golangci-lint run --enable-only=staticcheck ./...
 
-# フォーマットとインポートの整理
+# フォーマット
 format:
-	go fmt ./...
-	goimports -w ./
+	golangci-lint run --enable-only=goimports --fix ./...
 
-# さまざまなlintを包括したサードパーティツール
-lint-all:
+lint:
 	golangci-lint run ./...
-
-lint: sec errcheck staticcheck
 	@echo "Check lint finished"
+
+lint-f:
+	golangci-lint run --fix ./...
+	@echo "Check lint with Write finished"
 
 build:
 	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/api/main.go

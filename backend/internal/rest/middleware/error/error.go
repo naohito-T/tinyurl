@@ -4,14 +4,13 @@ package error
 
 import (
 	"errors"
+	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/naohito-T/tinyurl/backend/domain/customerror"
 )
 
-// これはGo言語における型アサーション（type assertion）の一例です。型アサーションは、インターフェースの値が特定の型を持っているかどうかをチェックし、その型の値を取り出すために使用されます。
-// このコードの場合、err はエラーを表すインターフェース型です。*echo.HTTPError は echo パッケージの HTTPError 型のポインタです。この行は、err が *echo.HTTPError 型の値を持っているかをチェックし、もしそうであれば he にその値を割り当て、ok に true を設定します。err が *echo.HTTPError 型でなければ、ok は false になり、he は nil になります。
-// この型アサーションを使うことで、安全に型変換を行いつつ、エラーチェックを同時に実施できます。
 func CustomErrorHandler(err error, c echo.Context) {
 	c.Logger().Error("カスタムエラーに入ったよ")
 	// ロギング
@@ -21,14 +20,27 @@ func CustomErrorHandler(err error, c echo.Context) {
 }
 
 func buildError(err error, c echo.Context) *customerror.ApplicationError {
+	c.Logger().Error("ビルドエラー実施中")
 	appErr := customerror.ApplicationError{
 		Status:  customerror.UnexpectedCode.Status,
 		Code:    customerror.UnexpectedCode.Code,
 		Message: customerror.UnexpectedCode.Message,
 	}
+	var ve validator.ValidationErrors
+	if errors.As(err, &ve) {
+		c.Logger().Error("errors.As():Failed at バリデーションエラー発生")
+		return &customerror.ApplicationError{
+			Status:  http.StatusBadRequest,
+			Code:    "ValidationError",
+			Message: "Input validation failed",
+		}
+	} else {
+		c.Logger().Error("判定なし。")
+	}
+
 	if errors.Is(err, customerror.WrongEmailVerificationErrorInstance) {
 		c.Logger().Error("これがWrongEmailVerificationErrorアプリケーションエラー")
-		// return &customerror.ApplicationError{}
 	}
+
 	return &appErr
 }

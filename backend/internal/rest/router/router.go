@@ -11,10 +11,6 @@ import (
 	// "github.com/naohito-T/tinyurl/backend/internal/rest/container"
 )
 
-func catchAllHandler(c echo.Context) error {
-	return c.JSON(http.StatusNotFound, map[string]string{"message": "Route not found"})
-}
-
 // https://tinyurl.com/app/api/url/create"
 // NewRouter これもシングルトンにした場合の例が気になる
 func NewRouter(e *echo.Echo) {
@@ -22,9 +18,10 @@ func NewRouter(e *echo.Echo) {
 	e.GET(Router.Health, handler.HealthHandler)
 	e.GET(Router.GetShortURL, hello)
 	e.POST(Router.CreateShortURL, hello)
-
 	// 未定義のルート用のキャッチオールハンドラ
-	e.Any("/*", catchAllHandler)
+	e.Any("/*", func(c echo.Context) error {
+		return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})
+	})
 }
 
 func hello(c echo.Context) error {
