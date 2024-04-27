@@ -5,7 +5,10 @@ run:
 
 issues:
   # golangci-lintがdefaultで無効にしているlintersを有効にする
-  exclude-use-default: false
+  # exclude-use-default: false
+  exclude-dirs:
+    - node_modules
+
 # linters-settings:
 linters:
   disable-all: true
@@ -19,3 +22,5 @@ linters:
     - staticcheck
     - prealloc
     - ineffassign
+  exclude:
+    - node_modules/**/*

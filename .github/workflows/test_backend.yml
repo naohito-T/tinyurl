@@ -40,7 +40,7 @@ jobs:
           cache-dependency-path: "backend/go.sum"
 
       - name: Check golangci-lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v5
         with:
           version: v1.54
           working-directory: backend
@@ -58,7 +58,7 @@ jobs:
           go-version-file: "backend/go.mod"
           cache-dependency-path: "backend/go.sum"
 
-      - name: Check Build API entrypoint 
+      - name: Check Build API entrypoint
         run: GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" cmd/api/main.go
 
   test-backend:
