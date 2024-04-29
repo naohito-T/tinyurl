@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humaecho"
 	"github.com/danielgtaylor/huma/v2/humacli"
@@ -8,32 +11,71 @@ import (
 	"github.com/naohito-T/tinyurl/backend/configs"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/router"
+	"github.com/spf13/cobra"
 )
 
 const (
 	defaultPort = ":6500"
 )
 
-// Options for the CLI. Pass `--port` or set the `SERVICE_PORT` env var.
+// ここはCLIからの引数を受け取るための構造体
 type Options struct {
-	Port int `help:"Port to listen on" short:"p" default:"8888"`
+	Debug bool   `doc:"Enable debug logging"`
+	Host  string `doc:"Hostname to listen on."`
+	Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
 }
 
-func main() {
-	cli := humacli.New(func(hooks humacli.Hooks, _ *Options) {
-		e := echo.New()
-		configs.NewAppEnvironment()
-		middleware.CustomMiddleware(e)
-		// Create the API
-		// e.Startでエラーが発生した場合、Fatalでプログラムを終了する
-		// e.Logger.Fatal(e.Start(defaultPort))
-		// api := humaecho.New(router.NewRouter(e), huma.DefaultConfig("My API", "1.0.0"))
-		humaecho.New(router.NewRouter(e), huma.DefaultConfig("My API", "1.0.0"))
+// publicにわける
+// user（ログイン必須）
+// private（管理者）
 
-		// Tell the CLI how to start your router.
+func main() {
+	var api huma.API
+
+	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
+		fmt.Printf("Options are debug:%v host:%v port%v\n", opts.Debug, opts.Host, opts.Port)
+
+		e := echo.New()
+		// configを初期化
+		configs.NewAppEnvironment()
+		config := huma.DefaultConfig(configs.OpenAPITitle, configs.OpenAPIVersion)
+		// Openapiのserver設定
+		config.Servers = []*huma.Server{
+			{URL: "http://localhost:6500/api/v1"},
+		}
+
+		config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+			"bearer": {
+				Type:         "http",
+				Scheme:       "bearer",
+				BearerFormat: "JWT",
+			},
+		}
+		config.DocsPath = "/docs"
+		// ミドルウェアを適用（すべてのリクエストに対して）
+		middleware.CustomMiddleware(e)
+		// /api/v1/openapi.yaml
+		// これgroup化したやつをnewUserRouterに渡す必要かも
+		api = humaecho.NewWithGroup(e, e.Group("/api/v1"), config)
+		router.NewPublicRouter(api)
+
+		// 未定義のルート用のキャッチオールハンドラ
+		e.Any("/*", func(c echo.Context) error {
+			return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})
+		})
+
 		hooks.OnStart(func() {
 			e.Logger.Fatal(e.Start(defaultPort))
 		})
+	})
+
+	cli.Root().AddCommand(&cobra.Command{
+		Use:   "openapi",
+		Short: "Print the OpenAPI spec",
+		Run: func(_ *cobra.Command, _ []string) {
+			b, _ := api.OpenAPI().YAML()
+			fmt.Println(string(b))
+		},
 	})
 	cli.Run()
 }
