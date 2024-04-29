@@ -1,15 +1,11 @@
 # Backend
 
+```sh
+make dev
 
-## memo
+curl -X GET http://localhost:6500/openapi.yaml
+```
 
-- go vet
-  - コンパイラでは発見できないバグを見つける
-  - go testを走らせれば自動で実行される（Go 1.10から）
+## API Specifies
 
-
-要件
-
- - go testを導入（これでgo vetもできる）
- - go lintは非推奨
-   - staticcheckを導入（VSCodeではデフォルト）
+see: <http://localhost:6500/docs>
