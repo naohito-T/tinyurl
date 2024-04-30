@@ -25,6 +25,26 @@ type Options struct {
 	Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
 }
 
+// /api/v1/openapi.yaml
+// initHuma: humaのconfigを初期化
+func initHuma() huma.Config {
+	config := huma.DefaultConfig(configs.OpenAPITitle, configs.OpenAPIVersion)
+	// Openapiのserver設定
+	config.Servers = []*huma.Server{
+		{URL: "http://localhost:6500/api/v1"},
+	}
+
+	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
+		"bearer": {
+			Type:         "http",
+			Scheme:       "bearer",
+			BearerFormat: "JWT",
+		},
+	}
+	config.DocsPath = "/docs"
+	return config
+}
+
 // publicにわける
 // user（ログイン必須）
 // private（管理者）
@@ -38,25 +58,11 @@ func main() {
 		e := echo.New()
 		// configを初期化
 		configs.NewAppEnvironment()
-		config := huma.DefaultConfig(configs.OpenAPITitle, configs.OpenAPIVersion)
-		// Openapiのserver設定
-		config.Servers = []*huma.Server{
-			{URL: "http://localhost:6500/api/v1"},
-		}
-
-		config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-			"bearer": {
-				Type:         "http",
-				Scheme:       "bearer",
-				BearerFormat: "JWT",
-			},
-		}
-		config.DocsPath = "/docs"
 		// ミドルウェアを適用（すべてのリクエストに対して）
 		middleware.CustomMiddleware(e)
-		// /api/v1/openapi.yaml
+
 		// これgroup化したやつをnewUserRouterに渡す必要かも
-		api = humaecho.NewWithGroup(e, e.Group("/api/v1"), config)
+		api = humaecho.NewWithGroup(e, e.Group("/api/v1"), initHuma())
 		router.NewPublicRouter(api)
 
 		// 未定義のルート用のキャッチオールハンドラ

@@ -38,6 +38,9 @@ lint-f:
 build:
 	GOARCH=arm64 GOOS=linux go build -o bin/main cmd/api/main.go
 
+build-openapi:
+	go run ./cmd/api/main.go openapi >./api/openapi.yaml
+
 # --------------------------
 # Utils
 # --------------------------
@@ -48,4 +51,4 @@ dynamo.admin:
 	export PORT="4005" && \
 	npx dynamodb-admin
 
-.PHONY: test sec errcheck staticcheck format lint-all lint build test dynamo.admin
+.PHONY: dev test sec errcheck staticcheck format lint-all lint build build-openapi dynamo.admin

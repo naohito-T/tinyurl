@@ -2,14 +2,11 @@ package router
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/labstack/echo/v4"
 	Router "github.com/naohito-T/tinyurl/backend/configs"
-	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
 	// "github.com/naohito-T/tinyurl/backend/internal/rest/container"
 )
 
@@ -48,17 +45,16 @@ func NewPublicRouter(app huma.API) {
 		OperationID: "health",
 		Method:      http.MethodGet,
 		Path:        Router.Health,
-		Summary:     "Get a greeting",
-		Description: "Get a greeting for a person by name.",
+		Summary:     "Health Check",
+		Description: "Check the health of the service.",
 		Tags:        []string{"Greetings"},
 	}, func(_ context.Context, _ *HealthCheckParams) (*HealthCheckParams2, error) {
 		resp := &HealthCheckParams2{Body: struct {
 			Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
-		}{Message: "ok3"}}
+		}{Message: "ok"}}
 		return resp, nil
 	})
 
-	// Register GET /greeting/{name}
 	huma.Register(app, huma.Operation{
 		OperationID: "get-greeting",
 		Method:      http.MethodGet,
@@ -80,26 +76,26 @@ func NewPublicRouter(app huma.API) {
 
 }
 
-func hello(c echo.Context) error {
-	// {"time":"2024-04-14T02:16:18.08145333Z","level":"INFO","msg":"Hello, World!"}
-	slog.NewLogger().Info("Hello, World!")
-	if err := isValid("hello"); err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, "Hello, World 2!")
-}
+// func hello(c echo.Context) error {
+// 	// {"time":"2024-04-14T02:16:18.08145333Z","level":"INFO","msg":"Hello, World!"}
+// 	slog.NewLogger().Info("Hello, World!")
+// 	if err := isValid("hello"); err != nil {
+// 		return err
+// 	}
+// 	return c.String(http.StatusOK, "Hello, World 2!")
+// }
 
-func health(c echo.Context) error {
-	println("Hello, World!")
-	if err := isValid("hello"); err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, "Hello, World!")
-}
+// func health(c echo.Context) error {
+// 	println("Hello, World!")
+// 	if err := isValid("hello"); err != nil {
+// 		return err
+// 	}
+// 	return c.String(http.StatusOK, "Hello, World!")
+// }
 
-func isValid(txt string) error {
-	if txt == "" {
-		return errors.New("Invalid")
-	}
-	return nil
-}
+// func isValid(txt string) error {
+// 	if txt == "" {
+// 		return errors.New("Invalid")
+// 	}
+// 	return nil
+// }
