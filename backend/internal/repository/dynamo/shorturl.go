@@ -21,16 +21,16 @@ type IShortURLRepository interface {
 }
 
 type ShortURLRepository struct {
-	Client *DynamoClient.Connection
+	*DynamoClient.Connection
 	// インターフェースは既に参照型です。これは、インターフェースが背後でポインタとして機能することを意味し、明示的にポインタとして渡す必要はありません。
-	logger slog.ILogger
+	slog.ILogger
 }
 
 func NewShortURLRepository(client *DynamoClient.Connection, logger slog.ILogger) *ShortURLRepository {
 	// &ShortURLRepository{...} によって ShortURLRepository 型の新しいインスタンスがメモリ上に作成され、そのインスタンスのアドレスが返されます
 	return &ShortURLRepository{
-		Client: client,
-		logger: logger,
+		client,
+		logger,
 	}
 }
 
@@ -46,7 +46,7 @@ type ItemKey struct {
 
 // 構造体に属することで、構造体が初期されていないと呼び出すことはできないことになる。
 func (r *ShortURLRepository) Get(ctx context.Context, hashURL string) (domain.ShortURL, error) {
-	r.logger.Debug("GetItemInput: %v", hashURL)
+	r.Debug("GetItemInput: %v", hashURL)
 
 	itemKey := ItemKey{
 		ID: hashURL,
@@ -58,7 +58,7 @@ func (r *ShortURLRepository) Get(ctx context.Context, hashURL string) (domain.Sh
 		return domain.ShortURL{}, err
 	}
 
-	result, err := r.Client.Conn.GetItem(ctx, &dynamodb.GetItemInput{
+	result, err := r.Conn.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String("offline-tinyurls"),
 		Key:       av,
 	})
@@ -85,7 +85,7 @@ func (r *ShortURLRepository) Get(ctx context.Context, hashURL string) (domain.Sh
 }
 
 func (r *ShortURLRepository) Put(ctx context.Context, params *domain.ShortURL) (domain.ShortURL, error) {
-	r.logger.Info("PutItemInput: %v", params)
+	r.Info("PutItemInput: %v", params)
 
 	item := TableItem{
 		ID:          params.ID,
@@ -98,7 +98,7 @@ func (r *ShortURLRepository) Put(ctx context.Context, params *domain.ShortURL) (
 		return domain.ShortURL{}, err // エラー時にゼロ値を返す
 	}
 
-	_, err = r.Client.Conn.PutItem(ctx, &dynamodb.PutItemInput{
+	_, err = r.Conn.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String("offline-tinyurls"),
 		Item:      av,
 	})

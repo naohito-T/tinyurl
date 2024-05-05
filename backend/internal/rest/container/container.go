@@ -10,13 +10,13 @@ import (
 )
 
 type GuestContainer struct {
-	URLUsecase *usecase.ShortURLUsecase
+	*usecase.ShortURLUsecase
 }
 
 var onceGuestContainer = sync.OnceValue(func() *GuestContainer {
 	dynamoRepo := repoDynamo.NewShortURLRepository(dynamo.NewDynamoConnection(), slog.NewLogger())
 	return &GuestContainer{
-		URLUsecase: usecase.NewURLUsecase(dynamoRepo),
+		usecase.NewURLUsecase(dynamoRepo),
 	}
 })
 

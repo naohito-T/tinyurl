@@ -1,4 +1,4 @@
-package error
+package handler
 
 // see: https://go.dev/play/p/TzZE1mdL63_1
 // errors.Is()とerrors.As()は、

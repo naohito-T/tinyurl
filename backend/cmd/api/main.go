@@ -32,7 +32,6 @@ func initHuma() huma.Config {
 	config.Servers = []*huma.Server{
 		{URL: configs.OpenAPIDocServerPath},
 	}
-
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
 		"bearer": {
 			Type:         "http",
@@ -50,19 +49,15 @@ func initHuma() huma.Config {
 
 func main() {
 	var api huma.API
+	var c configs.AppEnvironment
 
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
-		fmt.Printf("Options are debug:%v host:%v port%v\n", opts.Debug, opts.Host, opts.Port)
-
+		// fmt.Printf("Options are debug:%v host:%v port%v\n", opts.Debug, opts.Host, opts.Port)
 		e := echo.New()
-		// configを初期化
-		configs.NewAppEnvironment()
-		// ミドルウェアを適用（すべてのリクエストに対して）
-		middleware.CustomMiddleware(e)
-		// これgroup化したやつをnewUserRouterに渡す必要かも
-		api = humaecho.NewWithGroup(e, e.Group("/api/v1"), initHuma())
-		router.NewPublicRouter(api)
+		c = configs.NewAppEnvironment()
 
+		middleware.CustomMiddleware(e, c)
+		api = router.NewPublicRouter(humaecho.NewWithGroup(e, e.Group("/api/v1"), initHuma()))
 		// 未定義のルート用のキャッチオールハンドラ
 		e.Any("/*", func(c echo.Context) error {
 			return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})

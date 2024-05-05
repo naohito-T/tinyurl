@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -26,12 +27,30 @@ type GetTinyURLQuery struct {
 }
 
 type GetTinyURLResponse struct {
-	Body struct {
-		ID          string `json:"id" required:"true"`
-		OriginalURL string `json:"original_url" required:"true"`
-		CreatedAt   string `json:"created_at" required:"true"`
-	}
+	Status int
+	Url    string `header:"Location"`
 }
+
+// これはcore routerにアクセスしたい場合の例
+// func (m *GetTinyURLQuery) Resolve(ctx huma.Context) []error {
+// 	h := handler.NewShortURLHandler(container.NewGuestContainer())
+// 	id := ctx.Param("id")
+// 	slog.NewLogger().Info("parammm: %v", id)
+// 	shortURL, err := h.GetShortURLHandler(ctx.Context(), id)
+// 	if err != nil {
+// 		slog.NewLogger().Info("Error retrieving URL: %v", err)
+// 		ctx.SetStatus(http.StatusNotFound)
+// 		ctx.BodyWriter().Write([]byte("Short URL not found"))
+// 		return []error{err} // ここで処理を終了させる
+// 	}
+
+// 	// エラーがなければリダイレクト処理を行う
+// 	redirectURL := shortURL.OriginalURL
+// 	ctx.SetStatus(http.StatusMovedPermanently)
+// 	ctx.SetHeader("Location", redirectURL)
+// 	// 正常なリダイレクト処理後は、ここで処理を終了
+// 	return nil
+// }
 
 type CreateTinyURLBody struct {
 	Body struct {
@@ -45,6 +64,18 @@ type CreateTinyURLResponse struct {
 	}
 }
 
+type GetInfoTinyURLQuery struct {
+	ID string `path:"id" required:"true"`
+}
+
+type GetInfoTinyURLResponse struct {
+	Body struct {
+		ID          string `json:"id" required:"true"`
+		OriginalURL string `json:"original_url" required:"true"`
+		CreatedAt   string `json:"created_at" required:"true"`
+	}
+}
+
 // 今日の課題
 // 1. tinyulrのAPIを作成する（できそう）
 // 2. テストを書く
@@ -52,7 +83,7 @@ type CreateTinyURLResponse struct {
 
 // https://tinyurl.com/app/api/url/create"
 // NewRouter これもシングルトンにした場合の例が気になる
-func NewPublicRouter(app huma.API) {
+func NewPublicRouter(app huma.API) huma.API {
 	h := handler.NewShortURLHandler(container.NewGuestContainer())
 
 	// これ見ていつか修正する https://aws.amazon.com/jp/builders-library/implementing-health-checks/
@@ -77,28 +108,60 @@ func NewPublicRouter(app huma.API) {
 	})
 
 	huma.Register(app, huma.Operation{
-		OperationID: "tinyurl",
+		OperationID: "get-tinyurl-with-redirect",
 		Method:      http.MethodGet,
 		Path:        configs.GetShortURL,
-		Summary:     "Get a original URL",
-		Description: "Get a original URL.",
+		Summary:     "Redirect to original URL",
 		Tags:        []string{"Public"},
-	}, func(ctx context.Context, query *struct {
-		GetTinyURLQuery
-	}) (*GetTinyURLResponse, error) {
-		resp := &GetTinyURLResponse{}
-		shortURL, err := h.GetShortURLHandler(ctx, query.ID)
-		if err != nil {
-			return nil, err
-		}
-		resp.Body.ID = shortURL.ID
-		resp.Body.OriginalURL = shortURL.OriginalURL
-		resp.Body.CreatedAt = shortURL.CreatedAt
-		return resp, nil
+		Parameters: []*huma.Param{
+			{
+				Name:        "id",
+				In:          "path",
+				Description: "ID of the short URL",
+				Required:    true,
+				Schema: &huma.Schema{
+					Type: "string",
+				},
+			},
+		},
+		Responses: map[string]*huma.Response{
+			"301": {
+				Description: "Redirect to original URL",
+				Headers: map[string]*huma.Header{
+					"Location": {
+						Description: "Location of the original URL",
+						Schema: &huma.Schema{
+							Type:   "string",
+							Format: "uri",
+						},
+					},
+				},
+			},
+			"404": {
+				Description: "Short URL not found",
+				Content: map[string]*huma.MediaType{
+					"text/plain": {
+						Schema: &huma.Schema{
+							Type: "string",
+						},
+					},
+				},
+			},
+		},
+	}, func(ctx context.Context, input *GetInfoTinyURLQuery) (*GetTinyURLResponse, error) {
+		fmt.Printf("GetInfoTinyURLQuery: %v", input.ID)
+		slog.NewLogger().Info("parammm: %v", input.ID)
+		shortURL, err := h.GetShortURLHandler(ctx, input.ID)
+		slog.NewLogger().Info("Result err GetShortURLHandler: %v", err)              // null
+		slog.NewLogger().Info("Result GetShortURLHandler: %v", shortURL.OriginalURL) // https://example.com/
+		return &GetTinyURLResponse{
+			Status: http.StatusTemporaryRedirect,
+			Url:    shortURL.OriginalURL,
+		}, nil
 	})
 
 	huma.Register(app, huma.Operation{
-		OperationID: "tinyurl",
+		OperationID: "create-tinyurl",
 		Method:      http.MethodPost,
 		Path:        configs.CreateShortURL,
 		Summary:     "Create a short URL",
@@ -113,4 +176,28 @@ func NewPublicRouter(app huma.API) {
 		resp.Body.ID = shortURL.ID
 		return resp, nil
 	})
+
+	huma.Register(app, huma.Operation{
+		OperationID: "info-tinyurl",
+		Method:      http.MethodGet,
+		Path:        configs.GetOnlyShortURL,
+		Summary:     "Get Info tinyurl",
+		Description: "Get Info tinyurl",
+		Tags:        []string{"Public"},
+	}, func(ctx context.Context, query *struct {
+		GetInfoTinyURLQuery
+	}) (*GetInfoTinyURLResponse, error) {
+		resp := &GetInfoTinyURLResponse{}
+		shortURL, err := h.GetShortURLHandler(ctx, query.ID)
+		if err != nil {
+			return nil, err
+		}
+		resp.Body.ID = shortURL.ID
+		resp.Body.OriginalURL = shortURL.OriginalURL
+		resp.Body.CreatedAt = shortURL.CreatedAt
+		return resp, nil
+	})
+
+	return app
+
 }
