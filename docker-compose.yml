@@ -7,8 +7,9 @@ services:
     environment:
       SERVICES: dynamodb,s3
       DEFAULT_REGION: ap-northeast-1
+      TZ: UTC
     volumes:
-    # ready hook
+      # ready hook
       - "$PWD/backend/docker/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
       - 'localstack-data:/tmp/localstack'
 
@@ -20,6 +21,7 @@ services:
     environment:
       AWS_ACCESS_KEY_ID: "XXXX"
       AWS_SECRET_ACCESS_KEY: "XXXX"
+      TZ: UTC
     volumes:
       - $PWD/backend:/app
     env_file:

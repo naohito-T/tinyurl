@@ -29,9 +29,8 @@ type Options struct {
 // initHuma: humaのconfigを初期化
 func initHuma() huma.Config {
 	config := huma.DefaultConfig(configs.OpenAPITitle, configs.OpenAPIVersion)
-	// Openapiのserver設定
 	config.Servers = []*huma.Server{
-		{URL: "http://localhost:6500/api/v1"},
+		{URL: configs.OpenAPIDocServerPath},
 	}
 
 	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
@@ -60,7 +59,6 @@ func main() {
 		configs.NewAppEnvironment()
 		// ミドルウェアを適用（すべてのリクエストに対して）
 		middleware.CustomMiddleware(e)
-
 		// これgroup化したやつをnewUserRouterに渡す必要かも
 		api = humaecho.NewWithGroup(e, e.Group("/api/v1"), initHuma())
 		router.NewPublicRouter(api)
