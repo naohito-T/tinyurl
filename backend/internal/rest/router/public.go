@@ -2,121 +2,51 @@ package router
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/naohito-T/tinyurl/backend/configs"
-	"github.com/naohito-T/tinyurl/backend/domain"
+	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/container"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/handler"
 )
 
-// huma.Register(app, huma.Operation{
-// 	OperationID: "omittable",
-// 	Method:      http.MethodPost,
-// 	Path:        "/omittable",
-// 	Summary:     "Omittable / nullable example",
-// }, func(ctx context.Context, input *struct {
-// 	Body *struct {
-// 		Name OmittableNullable[string] `json:"name,omitempty" maxLength:"10"`
-// 	}
-// }) (*MyResponse, error) {
-// 	resp := &MyResponse{}
-// 	if input.Body == nil {
-// 		resp.Body.Message = "Body was not sent"
-// 	} else if !input.Body.Name.Sent {
-// 		resp.Body.Message = "Name was omitted from the request"
-// 	} else if input.Body.Name.Null {
-// 		resp.Body.Message = "Name was set to null"
-// 	} else {
-// 		resp.Body.Message = "Name was set to: " + input.Body.Name.Value
-// 	}
-// 	return resp, nil
-// })
-
-type FilterOrQuery struct {
-	FilterID int64  `query:"filter_id" doc:"filter_id and query are mutually exclusive"`
-	Query    string `query:"query" doc:"filter_id and query are mutually exclusive"`
+type HealthCheckQuery struct {
+	CheckDB bool `query:"q" doc:"Optional database check parameter"`
 }
 
-func (f *FilterOrQuery) Resolve(ctx huma.Context) []error {
-	if f.FilterID != 0 && f.Query != "" {
-		return []error{&huma.ErrorDetail{
-			Message:  "Cannot pass both filter_id and query at the same time",
-			Location: "query",
-			Value:    fmt.Sprintf("filter_id:%d query:%s", f.FilterID, f.Query),
-		}}
+type HealthCheckResponse struct {
+	Body struct {
+		Message string `json:"message"`
 	}
-	return nil
 }
 
-// type HealthCheckParams struct {
-// 	CheckDB string `json:"check_db"`
-// }
+type GetTinyURLQuery struct {
+	ID string `path:"id" required:"true"`
+}
 
-// GreetingOutput represents the greeting operation response.
+type GetTinyURLResponse struct {
+	Body struct {
+		ID          string `json:"id" required:"true"`
+		OriginalURL string `json:"original_url" required:"true"`
+		CreatedAt   string `json:"created_at" required:"true"`
+	}
+}
+
 type CreateTinyURLBody struct {
 	Body struct {
-		URL string `json:"url" example:"http://example.com" doc:"URL to shorten"`
+		URL string `json:"url" required:"true" example:"http://example.com" doc:"URL to shorten"`
 	}
 }
 
-type HealthCheckQuery struct {
+type CreateTinyURLResponse struct {
 	Body struct {
-		Message string `json:"message,omitempty" example:"Hello, world!" doc:"Greeting message"`
+		ID string `json:"id"`
 	}
 }
-
-// type HealthCheckResponse struct {
-// 	Body struct {
-// 		Message string `json:"message,omitempty" example:"Hello, world!" doc:"Greeting message"`
-// 	}
-// }
-
-// HealthCheckParams はヘルスチェックのリクエストパラメータを定義します。
-type HealthCheckParams struct {
-	CheckDB *string `query:"check_db" doc:"Optional database check parameter"`
-}
-
-// HealthCheckResponse はヘルスチェックのレスポンスを定義します。
-type HealthCheckResponse struct {
-	Message string `json:"message"`
-}
-
-// type OmittableNullable[T any] struct {
-// 	Sent  bool
-// 	Null  bool
-// 	Value T
-// }
-
-// UnmarshalJSON unmarshals this value from JSON input.
-// func (o *OmittableNullable[T]) UnmarshalJSON(b []byte) error {
-// 	if len(b) > 0 {
-// 		o.Sent = true
-// 		if bytes.Equal(b, []byte("null")) {
-// 			o.Null = true
-// 			return nil
-// 		}
-// 		return json.Unmarshal(b, &o.Value)
-// 	}
-// 	return nil
-// }
-
-// Schema returns a schema representing this value on the wire.
-// It returns the schema of the contained type.
-// func (o OmittableNullable[T]) Schema(r huma.Registry) *huma.Schema {
-// 	return r.Schema(reflect.TypeOf(o.Value), true, "")
-// }
-
-// type MyResponse struct {
-// 	Body struct {
-// 		Message string `json:"message"`
-// 	}
-// }
 
 // 今日の課題
-// 1. tinyulrのAPIを作成する
+// 1. tinyulrのAPIを作成する（できそう）
 // 2. テストを書く
 // 3. ドキュメントを書く
 
@@ -124,6 +54,8 @@ type HealthCheckResponse struct {
 // NewRouter これもシングルトンにした場合の例が気になる
 func NewPublicRouter(app huma.API) {
 	h := handler.NewShortURLHandler(container.NewGuestContainer())
+
+	// これ見ていつか修正する https://aws.amazon.com/jp/builders-library/implementing-health-checks/
 	huma.Register(app, huma.Operation{
 		OperationID: "health",
 		Method:      http.MethodGet,
@@ -132,14 +64,38 @@ func NewPublicRouter(app huma.API) {
 		Description: "Check the health of the service.",
 		Tags:        []string{"Public"},
 	}, func(_ context.Context, input *struct {
-		FilterOrQuery
-	}) (*struct{}, error) {
-		fmt.Printf("Got filter_id:%d query:%s\n", input.FilterID, input.Query)
-		return nil, nil
+		HealthCheckQuery
+	}) (*HealthCheckResponse, error) {
+		slog.NewLogger().Info("Health Check: %v", input.CheckDB)
+		return &HealthCheckResponse{
+			Body: struct {
+				Message string `json:"message"`
+			}{
+				Message: "ok",
+			},
+		}, nil
 	})
 
-	// オリジナルのURLは必須
-	// ここではすぐにhandlerへ渡す
+	huma.Register(app, huma.Operation{
+		OperationID: "tinyurl",
+		Method:      http.MethodGet,
+		Path:        configs.GetShortURL,
+		Summary:     "Get a original URL",
+		Description: "Get a original URL.",
+		Tags:        []string{"Public"},
+	}, func(ctx context.Context, query *struct {
+		GetTinyURLQuery
+	}) (*GetTinyURLResponse, error) {
+		resp := &GetTinyURLResponse{}
+		shortURL, err := h.GetShortURLHandler(ctx, query.ID)
+		if err != nil {
+			return nil, err
+		}
+		resp.Body.ID = shortURL.ID
+		resp.Body.OriginalURL = shortURL.OriginalURL
+		resp.Body.CreatedAt = shortURL.CreatedAt
+		return resp, nil
+	})
 
 	huma.Register(app, huma.Operation{
 		OperationID: "tinyurl",
@@ -148,14 +104,13 @@ func NewPublicRouter(app huma.API) {
 		Summary:     "Create a short URL",
 		Description: "Create a short URL.",
 		Tags:        []string{"Public"},
-	}, func(ctx context.Context, body *CreateTinyURLBody) (*domain.ShortURL, error) {
+	}, func(ctx context.Context, body *CreateTinyURLBody) (*CreateTinyURLResponse, error) {
+		resp := &CreateTinyURLResponse{}
 		shortURL, err := h.CreateShortURLHandler(ctx, body.Body.URL)
 		if err != nil {
 			return nil, err
 		}
-		return &shortURL, nil
+		resp.Body.ID = shortURL.ID
+		return resp, nil
 	})
-
-	// e.GET(Router.GetShortURL, hello)
-	// e.POST(Router.CreateShortURL, hello)
 }

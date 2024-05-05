@@ -25,12 +25,9 @@ func NewURLUsecase(u IShortURLRepo) *ShortURLUsecase {
 	}
 }
 
-func (u *ShortURLUsecase) GetByShortURL(ctx context.Context, hashURL string) domain.ShortURL {
-	shortURL, err := u.shortURLRepo.Get(ctx, hashURL)
-	if err != nil {
-		panic(err)
-	}
-	return shortURL
+func (u *ShortURLUsecase) GetByShortURL(ctx context.Context, hashID string) (domain.ShortURL, error) {
+	slog.NewLogger().Info("GetByShortURL: %v", hashID)
+	return u.shortURLRepo.Get(ctx, hashID)
 }
 
 func (u *ShortURLUsecase) CreateShortURL(ctx context.Context, originalURL string) (domain.ShortURL, error) {

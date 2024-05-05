@@ -11,7 +11,7 @@ const (
 	// /api/v1/health
 	Health path = "/health"
 	// /api/v1/urls
-	GetShortURL path = "/urls/:shortUrl"
+	GetShortURL path = "/urls/:id"
 	// /api/v1/urls
 	CreateShortURL path = "/urls"
 )

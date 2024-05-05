@@ -18,7 +18,6 @@ const (
 // Description: APIエンドポイントの詳細な説明です。ここでは操作の詳細や動作についての追加情報を提供します。
 // Tags: このAPI操作に関連付けられたタグのリストです。これにより、APIドキュメント内で類似の操作をグループ化することができます。
 
-
 // huma.Register(app, huma.Operation{
 // 	OperationID: "health",
 // 	Method:      http.MethodGet,

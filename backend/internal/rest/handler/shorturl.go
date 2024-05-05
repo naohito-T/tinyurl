@@ -14,6 +14,7 @@ type ShortURLHandler struct {
 
 // IShortURLHandler defines the interface for short URL handler operations.
 type IShortURLHandler interface {
+	GetShortURLHandler(ctx context.Context, hashID string) (domain.ShortURL, error)
 	CreateShortURLHandler(ctx context.Context, originalURL string) (domain.ShortURL, error)
 }
 
@@ -22,6 +23,11 @@ func NewShortURLHandler(c *container.GuestContainer) IShortURLHandler {
 	return &ShortURLHandler{
 		container: c,
 	}
+}
+
+func (s *ShortURLHandler) GetShortURLHandler(ctx context.Context, hashID string) (domain.ShortURL, error) {
+	slog.NewLogger().Info("GetShortURLHandler: %v", hashID)
+	return s.container.URLUsecase.GetByShortURL(ctx, hashID)
 }
 
 func (s *ShortURLHandler) CreateShortURLHandler(ctx context.Context, originalURL string) (domain.ShortURL, error) {
