@@ -13,7 +13,7 @@ type GuestContainer struct {
 	URLUsecase *usecase.ShortURLUsecase
 }
 
-var newGuestContainer = sync.OnceValue(func() *GuestContainer {
+var onceGuestContainer = sync.OnceValue(func() *GuestContainer {
 	dynamoRepo := repoDynamo.NewShortURLRepository(dynamo.NewDynamoConnection(), slog.NewLogger())
 	return &GuestContainer{
 		URLUsecase: usecase.NewURLUsecase(dynamoRepo),
@@ -21,5 +21,5 @@ var newGuestContainer = sync.OnceValue(func() *GuestContainer {
 })
 
 func NewGuestContainer() *GuestContainer {
-	return newGuestContainer()
+	return onceGuestContainer()
 }

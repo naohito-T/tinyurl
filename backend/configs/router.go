@@ -8,7 +8,10 @@ package configs
 type path = string
 
 const (
-	Health         path = "/health"
-	GetShortURL    path = "/api/v1/urls/:shortUrl"
-	CreateShortURL path = "/api/v1/urls"
+	// /api/v1/health
+	Health path = "/health"
+	// /api/v1/urls
+	GetShortURL path = "/urls/:id"
+	// /api/v1/urls
+	CreateShortURL path = "/urls"
 )

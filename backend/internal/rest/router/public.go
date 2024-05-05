@@ -2,104 +2,115 @@ package router
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/labstack/echo/v4"
-	Router "github.com/naohito-T/tinyurl/backend/configs"
+	"github.com/naohito-T/tinyurl/backend/configs"
 	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
-	// "github.com/naohito-T/tinyurl/backend/internal/rest/container"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/container"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/handler"
 )
 
-type HealthCheckParams struct {
-	CheckDB string `json:"check_db"`
+type HealthCheckQuery struct {
+	CheckDB bool `query:"q" doc:"Optional database check parameter"`
 }
 
-// type GreetingOutput struct {
-// 	Greeting    string `json:"greeting"`
-// 	Suffix      string `json:"suffix"`
-// 	Length      int    `json:"length"`
-// 	ContentType string `json:"content_type"`
-// 	Num         int    `json:"num"`
-// }
-
-type HealthCheckParams2 struct {
+type HealthCheckResponse struct {
 	Body struct {
-		// Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
-		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
+		Message string `json:"message"`
 	}
 }
 
-// GreetingOutput represents the greeting operation response.
-type GreetingOutput3 struct {
+type GetTinyURLQuery struct {
+	ID string `path:"id" required:"true"`
+}
+
+type GetTinyURLResponse struct {
 	Body struct {
-		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
+		ID          string `json:"id" required:"true"`
+		OriginalURL string `json:"original_url" required:"true"`
+		CreatedAt   string `json:"created_at" required:"true"`
 	}
 }
+
+type CreateTinyURLBody struct {
+	Body struct {
+		URL string `json:"url" required:"true" example:"http://example.com" doc:"URL to shorten"`
+	}
+}
+
+type CreateTinyURLResponse struct {
+	Body struct {
+		ID string `json:"id"`
+	}
+}
+
+// 今日の課題
+// 1. tinyulrのAPIを作成する（できそう）
+// 2. テストを書く
+// 3. ドキュメントを書く
 
 // https://tinyurl.com/app/api/url/create"
 // NewRouter これもシングルトンにした場合の例が気になる
 func NewPublicRouter(app huma.API) {
-	// container := container.NewGuestContainer()
+	h := handler.NewShortURLHandler(container.NewGuestContainer())
 
+	// これ見ていつか修正する https://aws.amazon.com/jp/builders-library/implementing-health-checks/
 	huma.Register(app, huma.Operation{
 		OperationID: "health",
 		Method:      http.MethodGet,
-		Path:        Router.Health,
-		Summary:     "Get a greeting",
-		Description: "Get a greeting for a person by name.",
-		Tags:        []string{"Greetings"},
-	}, func(_ context.Context, _ *HealthCheckParams) (*HealthCheckParams2, error) {
-		resp := &HealthCheckParams2{Body: struct {
-			Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
-		}{Message: "ok3"}}
-		return resp, nil
-	})
-
-	// Register GET /greeting/{name}
-	huma.Register(app, huma.Operation{
-		OperationID: "get-greeting",
-		Method:      http.MethodGet,
-		Path:        "/greeting/{name}",
-		Summary:     "Get a greeting",
-		Description: "Get a greeting for a person by name.",
-		Tags:        []string{"Greetings"},
+		Path:        configs.Health,
+		Summary:     "Health Check",
+		Description: "Check the health of the service.",
+		Tags:        []string{"Public"},
 	}, func(_ context.Context, input *struct {
-		Name string `path:"name" maxLength:"30" example:"world" doc:"Name to greet"`
-	}) (*GreetingOutput3, error) {
-		resp := &GreetingOutput3{}
-		resp.Body.Message = fmt.Sprintf("Hello, %s!", input.Name)
+		HealthCheckQuery
+	}) (*HealthCheckResponse, error) {
+		slog.NewLogger().Info("Health Check: %v", input.CheckDB)
+		return &HealthCheckResponse{
+			Body: struct {
+				Message string `json:"message"`
+			}{
+				Message: "ok",
+			},
+		}, nil
+	})
+
+	huma.Register(app, huma.Operation{
+		OperationID: "tinyurl",
+		Method:      http.MethodGet,
+		Path:        configs.GetShortURL,
+		Summary:     "Get a original URL",
+		Description: "Get a original URL.",
+		Tags:        []string{"Public"},
+	}, func(ctx context.Context, query *struct {
+		GetTinyURLQuery
+	}) (*GetTinyURLResponse, error) {
+		resp := &GetTinyURLResponse{}
+		shortURL, err := h.GetShortURLHandler(ctx, query.ID)
+		if err != nil {
+			return nil, err
+		}
+		resp.Body.ID = shortURL.ID
+		resp.Body.OriginalURL = shortURL.OriginalURL
+		resp.Body.CreatedAt = shortURL.CreatedAt
 		return resp, nil
 	})
 
-	// e.GET(Router.Health, health)
-	// e.GET(Router.GetShortURL, hello)
-	// e.POST(Router.CreateShortURL, hello)
-
-}
-
-func hello(c echo.Context) error {
-	// {"time":"2024-04-14T02:16:18.08145333Z","level":"INFO","msg":"Hello, World!"}
-	slog.NewLogger().Info("Hello, World!")
-	if err := isValid("hello"); err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, "Hello, World 2!")
-}
-
-func health(c echo.Context) error {
-	println("Hello, World!")
-	if err := isValid("hello"); err != nil {
-		return err
-	}
-	return c.String(http.StatusOK, "Hello, World!")
-}
-
-func isValid(txt string) error {
-	if txt == "" {
-		return errors.New("Invalid")
-	}
-	return nil
+	huma.Register(app, huma.Operation{
+		OperationID: "tinyurl",
+		Method:      http.MethodPost,
+		Path:        configs.CreateShortURL,
+		Summary:     "Create a short URL",
+		Description: "Create a short URL.",
+		Tags:        []string{"Public"},
+	}, func(ctx context.Context, body *CreateTinyURLBody) (*CreateTinyURLResponse, error) {
+		resp := &CreateTinyURLResponse{}
+		shortURL, err := h.CreateShortURLHandler(ctx, body.Body.URL)
+		if err != nil {
+			return nil, err
+		}
+		resp.Body.ID = shortURL.ID
+		return resp, nil
+	})
 }
