@@ -1,4 +1,4 @@
-package slog
+package infrastructure
 
 import (
 	"log/slog"
@@ -33,7 +33,7 @@ type Logger struct {
 
 var newOnceLogger = sync.OnceValue(func() *Logger {
 	// これは1.22.0で追加されたもの
-	// slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	return &Logger{
 		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)),
 	}

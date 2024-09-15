@@ -1,5 +1,9 @@
 # CONTRIBUTING
 
+## Coding
+
+https://go.dev/doc/effective_go
+
 ## Backend
 
 ### Setup

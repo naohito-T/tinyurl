@@ -10,7 +10,9 @@ pre-push:
       tags: backend security
       root: "backend"
       glob: "*.{go}"
-      run: go mod tidy
+      run: |
+        go mod tidy
+        make build-openapi
 
 pre-commit:
   parallel: true

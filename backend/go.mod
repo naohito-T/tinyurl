@@ -1,6 +1,6 @@
 module github.com/naohito-T/tinyurl/backend
 
-go 1.21
+go 1.22
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.26.1
@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.13.13
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.31.1
 	github.com/aws/smithy-go v1.20.2
-	github.com/danielgtaylor/huma/v2 v2.15.0
+	github.com/danielgtaylor/huma/v2 v2.22.1
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/echo/v4 v4.11.4
