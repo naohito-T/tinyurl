@@ -1,9 +1,9 @@
 package container
 
 import (
-	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/dynamo"
-	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
-	repoDynamo "github.com/naohito-T/tinyurl/backend/internal/repository/dynamo"
+	"github.com/naohito-T/tinyurl/backend/configs"
+	infra "github.com/naohito-T/tinyurl/backend/internal/infrastructure"
+	repo "github.com/naohito-T/tinyurl/backend/internal/repository/dynamo"
 	"github.com/naohito-T/tinyurl/backend/internal/usecase"
 
 	"sync"
@@ -14,9 +14,11 @@ type GuestContainer struct {
 }
 
 var onceGuestContainer = sync.OnceValue(func() *GuestContainer {
-	dynamoRepo := repoDynamo.NewShortURLRepository(dynamo.NewDynamoConnection(), slog.NewLogger())
+	logger := infra.NewLogger()
+	env := configs.NewAppEnvironment()
+	dynamoRepo := repo.NewShortURLRepository(infra.NewDynamoConnection(logger, env), logger)
 	return &GuestContainer{
-		usecase.NewURLUsecase(dynamoRepo),
+		usecase.NewURLUsecase(dynamoRepo, logger),
 	}
 })
 

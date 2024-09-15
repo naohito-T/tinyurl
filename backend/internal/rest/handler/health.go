@@ -2,17 +2,33 @@ package handler
 
 // import (
 // 	"context"
-// 	"net/http"
 
-// 	"github.com/labstack/echo/v4"
-// 	"github.com/naohito-T/tinyurl/backend/domain/customerror"
+// 	"github.com/naohito-T/tinyurl/backend/internal/rest/container"
 // )
 
-// // HealthCheckParams はヘルスチェックのパラメータを定義します
-// // type HealthCheckParams struct {
-// // 	// CheckDB *string `query:"check_db" validate:"required"`
-// // 	CheckDB *string `query:"check_db"`
-// // }
+// type HealthCheckHandler struct {
+// 	*container.GuestContainer
+// }
+
+// type IHealthCheckHandler interface {
+// 	HealthHandler(ctx context.Context) (bool error)
+// }
+
+// func NewHealthCheckHandler(c *container.GuestContainer) IHealthCheckHandler {
+// 	return &HealthCheckHandler{
+// 		c,
+// 	}
+// }
+
+// func (h *HealthCheckHandler) HealthHandler(ctx context.Context) (bool error) {
+// 	h.CreateShortURL()
+// }
+
+// HealthCheckParams はヘルスチェックのパラメータを定義します
+// type HealthCheckParams struct {
+// 	// CheckDB *string `query:"check_db" validate:"required"`
+// 	CheckDB *string `query:"check_db"`
+// }
 
 // func HealthHandler(c echo.Context) error {
 // 	h := new(HealthCheckParams)

@@ -11,8 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/naohito-T/tinyurl/backend/domain"
-	DynamoClient "github.com/naohito-T/tinyurl/backend/internal/infrastructures/dynamo"
-	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
+	"github.com/naohito-T/tinyurl/backend/internal/infrastructure"
 )
 
 type IShortURLRepository interface {
@@ -21,12 +20,12 @@ type IShortURLRepository interface {
 }
 
 type ShortURLRepository struct {
-	*DynamoClient.Connection
+	*infrastructure.Connection
 	// インターフェースは既に参照型です。これは、インターフェースが背後でポインタとして機能することを意味し、明示的にポインタとして渡す必要はありません。
-	slog.ILogger
+	infrastructure.ILogger
 }
 
-func NewShortURLRepository(client *DynamoClient.Connection, logger slog.ILogger) *ShortURLRepository {
+func NewShortURLRepository(client *infrastructure.Connection, logger infrastructure.ILogger) *ShortURLRepository {
 	// &ShortURLRepository{...} によって ShortURLRepository 型の新しいインスタンスがメモリ上に作成され、そのインスタンスのアドレスが返されます
 	return &ShortURLRepository{
 		client,
@@ -58,7 +57,7 @@ func (r *ShortURLRepository) Get(ctx context.Context, hashURL string) (domain.Sh
 		return domain.ShortURL{}, err
 	}
 
-	result, err := r.Conn.GetItem(ctx, &dynamodb.GetItemInput{
+	result, err := r.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String("offline-tinyurls"),
 		Key:       av,
 	})
@@ -98,7 +97,7 @@ func (r *ShortURLRepository) Put(ctx context.Context, params *domain.ShortURL) (
 		return domain.ShortURL{}, err // エラー時にゼロ値を返す
 	}
 
-	_, err = r.Conn.PutItem(ctx, &dynamodb.PutItemInput{
+	_, err = r.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String("offline-tinyurls"),
 		Item:      av,
 	})

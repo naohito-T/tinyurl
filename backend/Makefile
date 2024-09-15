@@ -51,4 +51,7 @@ dynamo.admin:
 	export PORT="4005" && \
 	npx dynamodb-admin
 
+openapi:
+	docker run -it --rm -p 9000:8080 -v $(pwd)/api/openapi.yaml:/usr/share/nginx/html/api/openapi.yaml -e API_URL=http://localhost:9000/api/openapi.yaml swaggerapi/swagger-ui:latest
+
 .PHONY: dev test sec errcheck staticcheck format lint-all lint build build-openapi dynamo.admin

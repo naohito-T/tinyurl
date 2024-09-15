@@ -17,7 +17,7 @@ import (
 // https://yuya-hirooka.hatenablog.com/entry/2021/10/15/123607
 func CustomMiddleware(e *echo.Echo, c configs.AppEnvironment) {
 	// echo.Loggerの設定変更
-	if c.Stage == "local" {
+	if c.IsLocal() {
 		e.Logger.SetLevel(log.DEBUG)
 	} else {
 		e.Logger.SetLevel(log.INFO)

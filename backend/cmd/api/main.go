@@ -9,8 +9,10 @@ import (
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/labstack/echo/v4"
 	"github.com/naohito-T/tinyurl/backend/configs"
+	"github.com/naohito-T/tinyurl/backend/internal/infrastructure"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/router"
+	appSchema "github.com/naohito-T/tinyurl/backend/schema/api"
 	"github.com/spf13/cobra"
 )
 
@@ -25,39 +27,22 @@ type Options struct {
 	Port  int    `doc:"Port to listen on." short:"p" default:"8888"`
 }
 
-// /api/v1/openapi.yaml
-// initHuma: humaのconfigを初期化
-func initHuma() huma.Config {
-	config := huma.DefaultConfig(configs.OpenAPITitle, configs.OpenAPIVersion)
-	config.Servers = []*huma.Server{
-		{URL: configs.OpenAPIDocServerPath},
-	}
-	config.Components.SecuritySchemes = map[string]*huma.SecurityScheme{
-		"bearer": {
-			Type:         "http",
-			Scheme:       "bearer",
-			BearerFormat: "JWT",
-		},
-	}
-	config.DocsPath = "/docs"
-	return config
-}
-
 // publicにわける
+// public（誰でもアクセス可能）
 // user（ログイン必須）
 // private（管理者）
 
 func main() {
 	var api huma.API
 	var c configs.AppEnvironment
+	logger := infrastructure.NewLogger()
 
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
-		// fmt.Printf("Options are debug:%v host:%v port%v\n", opts.Debug, opts.Host, opts.Port)
 		e := echo.New()
 		c = configs.NewAppEnvironment()
 
 		middleware.CustomMiddleware(e, c)
-		api = router.NewPublicRouter(humaecho.NewWithGroup(e, e.Group("/api/v1"), initHuma()))
+		api = router.NewPublicRouter(humaecho.NewWithGroup(e, e.Group("/api/v1"), appSchema.NewHumaConfig()), logger)
 		// 未定義のルート用のキャッチオールハンドラ
 		e.Any("/*", func(c echo.Context) error {
 			return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})

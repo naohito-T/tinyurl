@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/naohito-T/tinyurl/backend/domain"
-	"github.com/naohito-T/tinyurl/backend/internal/infrastructures/slog"
+	"github.com/naohito-T/tinyurl/backend/internal/infrastructure"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/container"
 )
 
@@ -15,6 +15,7 @@ import (
 // 埋め込み(embedding)
 type ShortURLHandler struct {
 	*container.GuestContainer
+	infrastructure.ILogger
 }
 
 // IShortURLHandler defines the interface for short URL handler operations.
@@ -24,18 +25,19 @@ type IShortURLHandler interface {
 }
 
 // NewShortURLHandler creates a new handler for short URLs.
-func NewShortURLHandler(c *container.GuestContainer) IShortURLHandler {
+func NewShortURLHandler(c *container.GuestContainer, logger infrastructure.ILogger) IShortURLHandler {
 	return &ShortURLHandler{
 		c,
+		logger,
 	}
 }
 
 func (s *ShortURLHandler) GetShortURLHandler(ctx context.Context, hashID string) (domain.ShortURL, error) {
-	slog.NewLogger().Info("GetShortURLHandler: %v", hashID)
+	s.Info("GetShortURLHandler: %v", hashID)
 	return s.GetByShortURL(ctx, hashID)
 }
 
 func (s *ShortURLHandler) CreateShortURLHandler(ctx context.Context, originalURL string) (domain.ShortURL, error) {
-	slog.NewLogger().Info("CreateShortURLHandler: %v", originalURL)
+	s.Info("CreateShortURLHandler: %v", originalURL)
 	return s.CreateShortURL(ctx, originalURL)
 }
