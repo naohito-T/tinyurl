@@ -19,16 +19,24 @@ import (
 // 	return singletonLogger
 // }
 
+type ILabelLogger interface {
+	Debug(message string, Detail map[string]interface{})
+	Info(message string, Detail map[string]interface{})
+	Warn(message string, Detail map[string]interface{}, Error map[string]interface{})
+	Error(message string, Detail map[string]interface{}, Error map[string]interface{})
+	// Fatal(format string, v ...any)
+}
+
 type ILogger interface {
-	Debug(format string, v ...any)
-	Info(format string, v ...any)
-	Warn(format string, v ...any)
-	Error(format string, v ...any)
+	Debug(kind string, message string, Detail map[string]interface{})
+	Info(kind string, message string, Detail map[string]interface{})
+	Warn(kind string, message string, Detail map[string]interface{}, Error map[string]interface{})
+	Error(kind string, message string, Detail map[string]interface{}, Error map[string]interface{})
 	// Fatal(format string, v ...any)
 }
 
 type Logger struct {
-	logger ILogger
+	logger *slog.Logger
 }
 
 var newOnceLogger = sync.OnceValue(func() *Logger {
@@ -43,20 +51,24 @@ func NewLogger() *Logger {
 	return newOnceLogger()
 }
 
-func (l *Logger) Debug(format string, v ...any) {
-	l.logger.Debug(format, v...)
+func NewLabelLogger() ILabelLogger {
+	return newOnceLogger()
 }
 
-func (l *Logger) Info(format string, v ...any) {
-	l.logger.Info(format, v...)
+func (l *Logger) Debug(kind string, message string, detail map[string]interface{}) {
+	l.logger.Debug(kind, message, detail)
 }
 
-func (l *Logger) Warn(format string, v ...any) {
-	l.logger.Warn(format, v...)
+func (l *Logger) Info(kind string, message string, detail map[string]interface{}) {
+	l.logger.Info(kind, message, detail)
 }
 
-func (l *Logger) Error(format string, v ...any) {
-	l.logger.Error(format, v...)
+func (l *Logger) Warn(kind string, message string, detail map[string]interface{}, error map[string]interface{}) {
+	l.logger.Warn(kind, message, detail, error)
+}
+
+func (l *Logger) Error(kind string, message string, detail map[string]interface{}, error map[string]interface{}) {
+	l.logger.Error(kind, message, detail, error)
 }
 
 // golangではFatalは使わない（os.Exit(1)を勝手に使われるため）

@@ -9,19 +9,19 @@ import (
 	"sync"
 )
 
-type GuestContainer struct {
+type PublicContainer struct {
 	*usecase.ShortURLUsecase
 }
 
-var onceGuestContainer = sync.OnceValue(func() *GuestContainer {
+var oncePublicContainer = sync.OnceValue(func() *PublicContainer {
 	logger := infra.NewLogger()
 	env := configs.NewAppEnvironment()
 	dynamoRepo := repo.NewShortURLRepository(infra.NewDynamoConnection(logger, env), logger)
-	return &GuestContainer{
+	return &PublicContainer{
 		usecase.NewURLUsecase(dynamoRepo, logger),
 	}
 })
 
-func NewGuestContainer() *GuestContainer {
-	return onceGuestContainer()
+func NewPublicContainer() *PublicContainer {
+	return oncePublicContainer()
 }

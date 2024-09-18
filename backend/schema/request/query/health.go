@@ -1,5 +1,5 @@
 package query
 
 type HealthCheckQuery struct {
-	CheckDB string `query:"check_db"`
+	CheckDB bool `query:"q" doc:"Optional DynamoDB check parameter"`
 }

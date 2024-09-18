@@ -33,7 +33,8 @@ type Options struct {
 // private（管理者）
 
 func main() {
-	var api huma.API
+	var publicAPI huma.API
+	var privateAPI huma.API
 	var c configs.AppEnvironment
 	logger := infrastructure.NewLogger()
 
@@ -42,7 +43,10 @@ func main() {
 		c = configs.NewAppEnvironment()
 
 		middleware.CustomMiddleware(e, c)
-		api = router.NewPublicRouter(humaecho.NewWithGroup(e, e.Group("/api/v1"), appSchema.NewHumaConfig()), logger)
+		public := e.Group("/v1/public")
+		private := e.Group("/v1/private")
+		publicAPI = router.NewPublicRouter(humaecho.NewWithGroup(e, public, appSchema.NewHumaConfig()), logger)
+		privateAPI = router.NewPublicRouter(humaecho.NewWithGroup(e, private, appSchema.NewHumaConfig()), logger)
 		// 未定義のルート用のキャッチオールハンドラ
 		e.Any("/*", func(c echo.Context) error {
 			return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})
@@ -57,7 +61,8 @@ func main() {
 		Use:   "openapi",
 		Short: "Print the OpenAPI spec",
 		Run: func(_ *cobra.Command, _ []string) {
-			b, _ := api.OpenAPI().YAML()
+			b, _ := publicAPI.OpenAPI().YAML()
+			privateAPI.OpenAPI().YAML()
 			fmt.Println(string(b))
 		},
 	})

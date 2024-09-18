@@ -1,4 +1,4 @@
-package api
+package public
 
 import (
 	"net/http"
@@ -7,9 +7,8 @@ import (
 	"github.com/naohito-T/tinyurl/backend/configs"
 )
 
-func GetHealthAPISchema() *huma.Operation {
-	return &huma.Operation{
-		OperationID: "health",
+var HealthAPISchema = &huma.Operation{
+		OperationID: "health-check",
 		Method:      http.MethodGet,
 		Path:        configs.Health,
 		Summary:     "Health Check",
@@ -59,4 +58,3 @@ func GetHealthAPISchema() *huma.Operation {
 			},
 		},
 	}
-}

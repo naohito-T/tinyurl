@@ -14,7 +14,7 @@ import (
 // ポイント4: 埋め込み元と埋め込み先に同じフィールド名が存在するとき、埋め込み先が優先される。
 // 埋め込み(embedding)
 type ShortURLHandler struct {
-	*container.GuestContainer
+	*container.PublicContainer
 	infrastructure.ILogger
 }
 
@@ -25,7 +25,7 @@ type IShortURLHandler interface {
 }
 
 // NewShortURLHandler creates a new handler for short URLs.
-func NewShortURLHandler(c *container.GuestContainer, logger infrastructure.ILogger) IShortURLHandler {
+func NewShortURLHandler(c *container.PublicContainer, logger infrastructure.ILogger) IShortURLHandler {
 	return &ShortURLHandler{
 		c,
 		logger,
