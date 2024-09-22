@@ -13,31 +13,28 @@ type IShortURLRepo interface {
 }
 
 type ShortURLUsecase struct {
-	// ここでIShortURLRepoを埋め込むことで、UsecaseがRepositoryを知っている
-	// 	はい、その通りです。IShortURLRepo インターフェースは、Get と Create という二つのメソッドを定義しており、このインターフェースを実装するどのクラスも、これらのメソッドを具体的に実装する必要があります。そして、ShortURLUsecase の中で shortURLRepo.Create(originalURL) を呼び出すことによって、このインターフェースを満たす具体的な実装に対して処理を委譲しています。
-	// ここでのポイントは、ShortURLUsecase クラスが IShortURLRepo インターフェースの具体的な実装に依存していないということです。この設計により、IShortURLRepo の実装を変更しても、ShortURLUsecase クラスを修正する必要がなくなります。つまり、データアクセス層の実装が変わっても、ビジネスロジック層は影響を受けないという設計原則（オープン/クローズド原則）に従っています。
 	shortURLRepo IShortURLRepo
-	logger       infrastructure.ILogger
-}
-
-func NewURLUsecase(u IShortURLRepo, logger infrastructure.ILogger) *ShortURLUsecase {
-	return &ShortURLUsecase{
-		shortURLRepo: u,
-		logger:       logger,
-	}
+	logger       infrastructure.ILabelLogger
 }
 
 func (u *ShortURLUsecase) GetByShortURL(ctx context.Context, hashID string) (domain.ShortURL, error) {
-	u.logger.Info("GetByShortURL: %v", hashID)
+	// u.logger.Info("GetByShortURL: %v", hashID)
 	return u.shortURLRepo.Get(ctx, hashID)
 }
 
 func (u *ShortURLUsecase) CreateShortURL(ctx context.Context, originalURL string) (domain.ShortURL, error) {
-	u.logger.Info("CreateShortURL: %v", originalURL)
+	// u.logger.Info("CreateShortURL: %v", originalURL)
 	return u.shortURLRepo.Put(ctx, domain.GenerateShortURL(originalURL))
 }
 
 func (u *ShortURLUsecase) Search(ctx context.Context, originalURL string) (domain.ShortURL, error) {
-	u.logger.Info("GetByOriginalURL: %v", originalURL)
+	// u.logger.Info("GetByOriginalURL: %v", originalURL)
 	return u.shortURLRepo.Get(ctx, originalURL)
+}
+
+func NewURLUsecase(u IShortURLRepo, logger infrastructure.ILabelLogger) *ShortURLUsecase {
+	return &ShortURLUsecase{
+		shortURLRepo: u,
+		logger:       logger,
+	}
 }

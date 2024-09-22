@@ -12,18 +12,19 @@ type AppEnvironment struct {
 	tinyURLCollection string `default:"offline-tinyurls"`
 }
 
-var newOnceLogger = sync.OnceValue(func() AppEnvironment {
-	var ae AppEnvironment
-	if err := envconfig.Process("", &ae); err != nil {
+// コピーで返す場合
+// 構造体のコピーを返すだけなので生成も一度だけでコストは低い。
+// ただし、構造体が大きい場合はコピーのコストがかかるので注意。
+// 参照で返す場合
+// 構造体のコピーを作成せずに参照を返すため、コストは低い。
+var newOnceEnvironment = sync.OnceValue(func() *AppEnvironment {
+	var appEnvironment AppEnvironment
+	if err := envconfig.Process("", &appEnvironment); err != nil {
 		panic(fmt.Sprintf("Failed to process environment config: %v", err))
 	}
-	return ae
-})
 
-// SEE: https://pkg.go.dev/github.com/kelseyhightower/envconfig
-func NewAppEnvironment() AppEnvironment {
-	return newOnceLogger()
-}
+	return &appEnvironment
+})
 
 func (a *AppEnvironment) IsTest() bool {
 	return a.stage == "test"
@@ -43,4 +44,9 @@ func (a *AppEnvironment) IsProd() bool {
 
 func (a *AppEnvironment) GetTinyURLCollectionName() string {
 	return a.tinyURLCollection
+}
+
+// SEE: https://pkg.go.dev/github.com/kelseyhightower/envconfig
+func NewAppEnvironment() *AppEnvironment {
+	return newOnceEnvironment()
 }

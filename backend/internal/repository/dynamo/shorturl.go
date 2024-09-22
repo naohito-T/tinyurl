@@ -22,10 +22,10 @@ type IShortURLRepository interface {
 type ShortURLRepository struct {
 	*infrastructure.Connection
 	// インターフェースは既に参照型です。これは、インターフェースが背後でポインタとして機能することを意味し、明示的にポインタとして渡す必要はありません。
-	infrastructure.ILogger
+	infrastructure.ILabelLogger
 }
 
-func NewShortURLRepository(client *infrastructure.Connection, logger infrastructure.ILogger) *ShortURLRepository {
+func NewShortURLRepository(client *infrastructure.Connection, logger infrastructure.ILabelLogger) *ShortURLRepository {
 	// &ShortURLRepository{...} によって ShortURLRepository 型の新しいインスタンスがメモリ上に作成され、そのインスタンスのアドレスが返されます
 	return &ShortURLRepository{
 		client,
@@ -45,7 +45,7 @@ type ItemKey struct {
 
 // 構造体に属することで、構造体が初期されていないと呼び出すことはできないことになる。
 func (r *ShortURLRepository) Get(ctx context.Context, hashURL string) (domain.ShortURL, error) {
-	r.Debug("GetItemInput: %v", hashURL)
+	// r.Debug("GetItemInput: %v", hashURL)
 
 	itemKey := ItemKey{
 		ID: hashURL,
@@ -84,7 +84,7 @@ func (r *ShortURLRepository) Get(ctx context.Context, hashURL string) (domain.Sh
 }
 
 func (r *ShortURLRepository) Put(ctx context.Context, params *domain.ShortURL) (domain.ShortURL, error) {
-	r.Info("PutItemInput: %v", params)
+	// r.Info("PutItemInput: %v", params)
 
 	item := TableItem{
 		ID:          params.ID,

@@ -17,11 +17,11 @@ type Client interface {
 
 type Connection struct {
 	*dynamodb.Client
-	ILogger
-	configs.AppEnvironment
+	ILabelLogger
+	*configs.AppEnvironment
 }
 
-func NewDynamoConnection(logger ILogger, env configs.AppEnvironment) *Connection {
+func NewDynamoConnection(logger ILabelLogger, env *configs.AppEnvironment) *Connection {
 	// https://zenn.dev/y16ra/articles/40ff14e8d2a4db
 	customResolver := aws.EndpointResolverFunc(func(service, region string) (aws.Endpoint, error) {
 		return aws.Endpoint{
@@ -35,7 +35,9 @@ func NewDynamoConnection(logger ILogger, env configs.AppEnvironment) *Connection
 		config.WithEndpointResolver(customResolver),
 	)
 	if err != nil {
-		logger.Error("unable to load SDK config, %v", err)
+		logger.Error("unable to load SDK config", map[string]interface{}{}, map[string]interface{}{
+			"error": err,
+		})
 	}
 
 	return &Connection{
@@ -46,12 +48,12 @@ func NewDynamoConnection(logger ILogger, env configs.AppEnvironment) *Connection
 }
 
 func (c *Connection) Get(ctx context.Context, params *dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error) {
-	c.Info("GetItemInput: %v", params)
+	// c.Info("GetItemInput: %v", params)
 	if result, err := c.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String(c.GetTinyURLCollectionName()),
 		Key:       params.Key,
 	}); err != nil {
-		c.Error("Get error: %v", err)
+		// c.Error("Get error: %v", err)
 		return nil, err
 	} else {
 		return result, nil
@@ -59,13 +61,13 @@ func (c *Connection) Get(ctx context.Context, params *dynamodb.GetItemInput) (*d
 }
 
 func (c *Connection) Put(ctx context.Context, params *dynamodb.PutItemInput, optFns ...func(*dynamodb.Options)) (*dynamodb.PutItemOutput, error) {
-	c.Info("PutItemInput: %v", params)
+	// c.Info("PutItemInput: %v", params)
 	if result, err := c.PutItem(ctx, &dynamodb.PutItemInput{
 		// rateLimitなどテーブルnameは上から渡したほうがいいかも
 		TableName: aws.String(c.GetTinyURLCollectionName()),
 		Item:      params.Item,
 	}, optFns...); err != nil {
-		c.Error("Put error: %v", err)
+		// c.Error("Put error: %v", err)
 		return nil, err
 	} else {
 		return result, nil
@@ -83,9 +85,9 @@ func (c *Connection) Put(ctx context.Context, params *dynamodb.PutItemInput, opt
 //		},
 //	}
 func (c *Connection) Search(ctx context.Context, params *dynamodb.QueryInput, optFns ...func(*dynamodb.Options)) (*dynamodb.QueryOutput, error) {
-	c.Info("SearchItemInput: %v", params)
+	// c.Info("SearchItemInput: %v", params)
 	if result, err := c.Query(ctx, params, optFns...); err != nil {
-		c.Error("Query error: %v", err)
+		// c.Error("Query error: %v", err)
 		return nil, err
 	} else {
 		return result, nil

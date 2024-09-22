@@ -9,7 +9,8 @@ import (
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/labstack/echo/v4"
 	"github.com/naohito-T/tinyurl/backend/configs"
-	"github.com/naohito-T/tinyurl/backend/internal/infrastructure"
+	infra "github.com/naohito-T/tinyurl/backend/internal/infrastructure"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/container"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/router"
 	appSchema "github.com/naohito-T/tinyurl/backend/schema/api"
@@ -34,19 +35,19 @@ type Options struct {
 
 func main() {
 	var publicAPI huma.API
-	var privateAPI huma.API
-	var c configs.AppEnvironment
-	logger := infrastructure.NewLogger()
+	// var privateAPI huma.API
+	var c *configs.AppEnvironment
 
 	cli := humacli.New(func(hooks humacli.Hooks, opts *Options) {
 		e := echo.New()
 		c = configs.NewAppEnvironment()
 
 		middleware.CustomMiddleware(e, c)
+
 		public := e.Group("/v1/public")
-		private := e.Group("/v1/private")
-		publicAPI = router.NewPublicRouter(humaecho.NewWithGroup(e, public, appSchema.NewHumaConfig()), logger)
-		privateAPI = router.NewPublicRouter(humaecho.NewWithGroup(e, private, appSchema.NewHumaConfig()), logger)
+		// private := e.Group("/v1/private")
+		publicAPI = router.NewPublicRouter(humaecho.NewWithGroup(e, public, appSchema.NewHumaConfig()), container.PublicContainer, infra.RouterLogger)
+		// privateAPI = router.NewPublicRouter(humaecho.NewWithGroup(e, private, appSchema.NewHumaConfig()), container.PublicContainer, infra.RouterLogger)
 		// 未定義のルート用のキャッチオールハンドラ
 		e.Any("/*", func(c echo.Context) error {
 			return c.JSON(http.StatusNotFound, map[string]string{"message": "route_not_found"})
@@ -57,14 +58,17 @@ func main() {
 		})
 	})
 
+	// Command
 	cli.Root().AddCommand(&cobra.Command{
 		Use:   "openapi",
 		Short: "Print the OpenAPI spec",
 		Run: func(_ *cobra.Command, _ []string) {
 			b, _ := publicAPI.OpenAPI().YAML()
-			privateAPI.OpenAPI().YAML()
+			// privateAPI.OpenAPI().YAML()
 			fmt.Println(string(b))
 		},
 	})
+
+	// Run the CLI
 	cli.Run()
 }

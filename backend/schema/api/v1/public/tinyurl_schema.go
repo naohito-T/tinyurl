@@ -8,7 +8,7 @@ import (
 )
 
 type tinyURLAPISchema struct {
-	GET huma.Operation
+	GET  huma.Operation
 	POST huma.Operation
 }
 
