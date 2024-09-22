@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var onceInitHuma = sync.OnceValue(func() huma.Config {
+var onceHumaConfig = sync.OnceValue(func() huma.Config {
 	config := huma.DefaultConfig(configs.OpenAPITitle, configs.OpenAPIVersion)
 	// /api/v1/openapi.yaml
 	config.Servers = []*huma.Server{
@@ -42,5 +42,5 @@ var onceInitHuma = sync.OnceValue(func() huma.Config {
 })
 
 func NewHumaConfig() huma.Config {
-	return onceInitHuma()
+	return onceHumaConfig()
 }

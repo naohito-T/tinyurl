@@ -10,12 +10,12 @@ type path = string
 const (
 	// /api/v1/health
 	Health path = "/health"
-	// リダイレクト用エンドポイント
-	GetShortURL path = "/urls/:id"
+	// すべてのURLを取得するエンドポイント
+	GetURLs path = "/urls"
 	// 短縮URLを作成するためのエンドポイント
 	CreateShortURL path = "/urls"
-	// すべてのURLをリストするためのエンドポイント
-	ListShortURLs path = "/urls/list"
-	//  特定の短縮URLの詳細情報を取得
-	GetOnlyShortURL path = "/urls/info/:id"
+	// リダイレクト用エンドポイント
+	GetShortURL path = "/urls/:id"
+	//  特定の短縮URLの詳細情報を取得（リダイレクトなし）
+	GetOnlyShortURL path = "/urls/:id/info"
 )

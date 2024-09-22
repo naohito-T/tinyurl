@@ -9,13 +9,13 @@ import (
 
 	// "github.com/naohito-T/tinyurl/backend/internal/rest/middleware/accesslog"
 	"github.com/naohito-T/tinyurl/backend/configs"
-	"github.com/naohito-T/tinyurl/backend/internal/rest/handler"
+	"github.com/naohito-T/tinyurl/backend/internal/rest/controller"
 	"github.com/naohito-T/tinyurl/backend/internal/rest/middleware/validator"
 )
 
 // loggerの考え方
 // https://yuya-hirooka.hatenablog.com/entry/2021/10/15/123607
-func CustomMiddleware(e *echo.Echo, c configs.AppEnvironment) {
+func CustomMiddleware(e *echo.Echo, c *configs.AppEnvironment) {
 	// echo.Loggerの設定変更
 	if c.IsLocal() {
 		e.Logger.SetLevel(log.DEBUG)
@@ -31,5 +31,5 @@ func CustomMiddleware(e *echo.Echo, c configs.AppEnvironment) {
 	// e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 	//     Format: "time=${time_rfc3339_nano}, method=${method}, uri=${uri}, status=${status}\n",
 	// }))
-	e.HTTPErrorHandler = handler.CustomErrorHandler
+	e.HTTPErrorHandler = controller.CustomErrorHandler
 }
